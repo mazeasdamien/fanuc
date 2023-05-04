@@ -6,6 +6,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using FRRobot;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace FanucRobotServer
 {
@@ -23,6 +24,7 @@ namespace FanucRobotServer
         private FRCIOSignals fRCIOSignals;
         private FRCIOSignal fRCIOSignal;
         private bool isReachable = true;
+        private dynamic IOSignal;
 
         public TCPServer(int port)
         {
@@ -30,6 +32,34 @@ namespace FanucRobotServer
             _port = port;
             _server = new TcpListener(_localAddr, _port);
             ConnectToRobot();
+        }
+
+        private async Task UpdateIOSignal(CancellationToken cancellationToken)
+        {
+            int updateInterval = 10; // Set this to the desired update interval in milliseconds
+            Stopwatch stopwatch = new Stopwatch();
+            stopwatch.Start();
+
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                if (stopwatch.ElapsedMilliseconds >= updateInterval)
+                {
+                    try
+                    {
+                        fRCIOSignal.Refresh();
+                        Console.WriteLine(IOSignal.Value.ToString());
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Error refreshing IO signal: " + ex.Message);
+                    }
+
+                    stopwatch.Restart();
+                }
+
+                // Adjust the delay to prevent excessive CPU usage
+                await Task.Delay(10, cancellationToken);
+            }
         }
 
         public void ConnectToRobot()
@@ -44,16 +74,13 @@ namespace FanucRobotServer
                 FRCTasks mobjTasks = _robot.Tasks;
                 FRCPrograms fRCPrograms = _robot.Programs;
 
+                // I/O
                 IOTypes = _robot.IOTypes;
                 dynamic IOType = IOTypes[1];
                 FRCIOType fRCIOType = IOType;
-
                 fRCIOSignals = IOType.Signals;
                 fRCIOSignal = fRCIOSignals[214];  
-                dynamic IOSignal;
                 IOSignal = fRCIOSignal;
-
-                Console.WriteLine(IOSignal.Value.ToString());
 
                 Thread.Sleep(500);
                 mobjTasks.AbortAll();
@@ -77,6 +104,9 @@ namespace FanucRobotServer
 
             // Continuously send data to clients in a separate task
             Task.Run(async () => await SendDataToClientContinuously(_cts.Token));
+
+            // Continuously update and display the IO signal value in a separate task
+            Task.Run(async () => await UpdateIOSignal(_cts.Token));
         }
 
         public void Stop()
@@ -145,7 +175,7 @@ namespace FanucRobotServer
                 }
 
                 // Adjust the delay as needed to control the frequency of updates
-                await Task.Delay(1, cancellationToken);
+                await Task.Delay(10, cancellationToken);
             }
         }
 
