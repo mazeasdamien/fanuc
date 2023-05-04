@@ -19,6 +19,10 @@ namespace FanucRobotServer
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private FRCJoint _prevJoint;
         private FRCXyzWpr _prevXyzWpr;
+        private FRCIOTypes IOTypes;
+        private FRCIOSignals fRCIOSignals;
+        private FRCIOSignal fRCIOSignal;
+        private bool isReachable = true;
 
         public TCPServer(int port)
         {
@@ -39,6 +43,18 @@ namespace FanucRobotServer
                 FRCAlarms fRCAlarms = _robot.Alarms;
                 FRCTasks mobjTasks = _robot.Tasks;
                 FRCPrograms fRCPrograms = _robot.Programs;
+
+                IOTypes = _robot.IOTypes;
+                dynamic IOType = IOTypes[1];
+                FRCIOType fRCIOType = IOType;
+
+                fRCIOSignals = IOType.Signals;
+                fRCIOSignal = fRCIOSignals[214];  
+                dynamic IOSignal;
+                IOSignal = fRCIOSignal;
+
+                Console.WriteLine(IOSignal.Value.ToString());
+
                 Thread.Sleep(500);
                 mobjTasks.AbortAll();
                 Thread.Sleep(500);
@@ -101,18 +117,26 @@ namespace FanucRobotServer
         private async Task SendDataToClientContinuously(CancellationToken cancellationToken)
         {
             string previousMessage = null;
+            bool? previousReachability = null;
 
             while (!cancellationToken.IsCancellationRequested)
             {
                 var curPosition = _robot.CurPosition;
                 var groupPositionJoint = curPosition.Group[1, FRECurPositionConstants.frJointDisplayType];
                 var groupPositionWorld = curPosition.Group[1, FRECurPositionConstants.frWorldDisplayType];
-                groupPositionJoint.Refresh(); // Refresh the joint position
-                groupPositionWorld.Refresh(); // Refresh the world position
+                groupPositionJoint.Refresh();
+                groupPositionWorld.Refresh();
                 var joint = (FRCJoint)groupPositionJoint.Formats[FRETypeCodeConstants.frJoint];
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
                 string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4}";
+
+                if (previousReachability == null || previousReachability != isReachable)
+                {
+                    string messageReachability = $"{isReachable}";
+                    SendDataToClient(messageReachability + "\n");
+                    previousReachability = isReachable;
+                }
 
                 if (previousMessage == null || previousMessage != message)
                 {
@@ -124,6 +148,7 @@ namespace FanucRobotServer
                 await Task.Delay(1, cancellationToken);
             }
         }
+
 
 
         private void SendDataToClient(string message)
@@ -178,7 +203,7 @@ namespace FanucRobotServer
                     {
                         string receivedData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
                         string[] values = receivedData.Split(',');
-                        Console.WriteLine("Data received from client: " + receivedData);
+                        //Console.WriteLine("Data received from client: " + receivedData);
 
                         FRCSysPositions fRCTPPositions = _robot.RegPositions;
                         FRCSysPosition sysPosition = fRCTPPositions[3];
@@ -194,7 +219,12 @@ namespace FanucRobotServer
 
                         if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
                         {
+                            isReachable = true;
                             sysGroupPosition.Update();
+                        }
+                        else
+                        {
+                            isReachable = false;
                         }
                     }
                 }
