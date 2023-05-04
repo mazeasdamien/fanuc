@@ -159,7 +159,10 @@ namespace FanucRobotServer
                 var joint = (FRCJoint)groupPositionJoint.Formats[FRETypeCodeConstants.frJoint];
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4}";
+                // Get the digital input value (1 for true, 0 for false)
+                string digitalInputValue = IOSignal.Value ? "1" : "0";
+
+                string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4},{digitalInputValue}";
 
                 if (previousReachability == null || previousReachability != isReachable)
                 {
@@ -178,8 +181,6 @@ namespace FanucRobotServer
                 await Task.Delay(10, cancellationToken);
             }
         }
-
-
 
         private void SendDataToClient(string message)
         {
