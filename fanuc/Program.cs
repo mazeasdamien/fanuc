@@ -81,14 +81,14 @@ namespace FanucRobotServer
                 fRCIOSignals = IOType.Signals;
                 fRCIOSignal = fRCIOSignals[214];  
                 IOSignal = fRCIOSignal;
-                /*
+                
                 Thread.Sleep(500);
                 mobjTasks.AbortAll();
                 Thread.Sleep(500);
                 fRCAlarms.Reset();
                 fRCPrograms.Selected = "DAMIEN";
                 FRCTPProgram fRCProgram = (FRCTPProgram)fRCPrograms[fRCPrograms.Selected, Type.Missing, Type.Missing];
-                fRCProgram.Run();*/
+                fRCProgram.Run();
             }
             catch (Exception e)
             {
