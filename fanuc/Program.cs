@@ -16,17 +16,12 @@ namespace FanucRobotServer
         private IPAddress _localAddr;
         private int _port;
         private FRCRobot _real_robot;
-        private FRCRobot _simulated_robot;
         private ConcurrentDictionary<TcpClient, byte> _clients = new ConcurrentDictionary<TcpClient, byte>();
         private CancellationTokenSource _cts = new CancellationTokenSource();
         private FRCJoint _prevJoint;
         private FRCXyzWpr _prevXyzWpr;
         private FRCIOTypes IOTypes;
-        private FRCIOSignals fRCIOSignals;
-        private FRCIOSignal fRCIOSignal;
         private bool isReachable = true;
-        private dynamic IOSignal;
-        private string IOvalue;
 
         public TCPServer(int port)
         {
@@ -36,52 +31,16 @@ namespace FanucRobotServer
             ConnectToRobot();
         }
 
-        private async Task UpdateIOSignal(CancellationToken cancellationToken)
-        {
-            int updateInterval = 10; // Set this to the desired update interval in milliseconds
-            Stopwatch stopwatch = new Stopwatch();
-            stopwatch.Start();
-
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                if (stopwatch.ElapsedMilliseconds >= updateInterval)
-                {
-                    try
-                    {
-                        fRCIOSignal.Refresh();
-                        IOvalue = IOSignal.Value.ToString();
-                        //Console.WriteLine(IOSignal.Value.ToString());
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine("Error refreshing IO signal: " + ex.Message);
-                    }
-
-                    stopwatch.Restart();
-                }
-
-                // Adjust the delay to prevent excessive CPU usage
-                await Task.Delay(10, cancellationToken);
-            }
-        }
-
         public void ConnectToRobot()
         {
             try
             {
                 _real_robot = new FRCRobot();
-                _simulated_robot = new FRCRobot();
                 _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
-                _simulated_robot.ConnectEx("127.0.0.1", false, 10, 1);
                 Console.WriteLine("Connected to real robot successfully.");
-                Console.WriteLine("Connected to simulated robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
                 FRCTasks mobjTasksREAL = _real_robot.Tasks;
                 FRCPrograms fRCProgramsREAL = _real_robot.Programs;
-
-                FRCAlarms fRCAlarmsSIMU = _simulated_robot.Alarms;
-                FRCTasks mobjTasksSIMU = _simulated_robot.Tasks;
-                FRCPrograms fRCProgramsSIMU = _simulated_robot.Programs;
 
                 Thread.Sleep(500);
 
@@ -90,51 +49,25 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                FRCSysPositions fRCTPPositionsS = _simulated_robot.RegPositions;
-                FRCSysPosition sysPositionS = fRCTPPositions[3];
-                FRCSysGroupPosition sysGroupPositionS = sysPosition.Group[1];
-                FRCXyzWpr xyzWprS = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
-
-                xyzWpr.X = 800;
+                xyzWpr.X = 900;
                 xyzWpr.Y = 0;
                 xyzWpr.Z = 840;
                 xyzWpr.W = -180;
                 xyzWpr.P = -60;
                 xyzWpr.R = 0;
 
-                xyzWprS.X = 800;
-                xyzWprS.Y = 0;
-                xyzWprS.Z = 840;
-                xyzWprS.W = -180;
-                xyzWprS.P = -60;
-                xyzWprS.R = 0;
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
-                sysGroupPositionS.Update();
                 Thread.Sleep(500);
-
-                // I/O
-                IOTypes = _simulated_robot.IOTypes;
-                dynamic IOType = IOTypes[1];
-                FRCIOType fRCIOType = IOType;
-                fRCIOSignals = IOType.Signals;
-                fRCIOSignal = fRCIOSignals[214];  
-                IOSignal = fRCIOSignal;
                 
                 Thread.Sleep(500);
                 mobjTasksREAL.AbortAll();
-                mobjTasksSIMU.AbortAll();
                 Thread.Sleep(500);
                 fRCAlarmsREAL.Reset();
-                fRCAlarmsSIMU.Reset();
                 fRCProgramsREAL.Selected = "DAMIEN";
-                fRCProgramsSIMU.Selected = "DAMIEN";
                 FRCTPProgram fRCProgramREAL = (FRCTPProgram)fRCProgramsREAL[fRCProgramsREAL.Selected, Type.Missing, Type.Missing];
-                FRCTPProgram fRCProgramSIMU = (FRCTPProgram)fRCProgramsSIMU[fRCProgramsSIMU.Selected, Type.Missing, Type.Missing];
                 fRCProgramREAL.Run();
-                fRCProgramSIMU.Run();
                 Console.WriteLine("Program Damien real robot started.");
-                Console.WriteLine("Program Damien simulated robot started.");
             }
             catch (Exception e)
             {
@@ -150,9 +83,6 @@ namespace FanucRobotServer
 
             // Continuously send data to clients in a separate task
             Task.Run(async () => await SendDataToClientContinuously(_cts.Token));
-
-            // Continuously update and display the IO signal value in a separate task
-            Task.Run(async () => await UpdateIOSignal(_cts.Token));
         }
 
         public void Stop()
@@ -205,10 +135,8 @@ namespace FanucRobotServer
                 var joint = (FRCJoint)groupPositionJoint.Formats[FRETypeCodeConstants.frJoint];
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                string digitalInputValue = IOSignal.Value ? "1" : "0";
-
-                string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4},{digitalInputValue}";
-                Console.WriteLine(message);
+                string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4}";
+                //Console.WriteLine(message);
 
                 if (previousReachability == null || previousReachability != isReachable)
                 {
@@ -224,7 +152,7 @@ namespace FanucRobotServer
                 }
 
                 // Adjust the delay as needed to control the frequency of updates
-                await Task.Delay(10, cancellationToken);
+                await Task.Delay(0, cancellationToken);
             }
         }
 
@@ -288,47 +216,17 @@ namespace FanucRobotServer
                         FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                         FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                        //simu
-                        FRCSysPositions fRCTPPositionsSIMU = _simulated_robot.RegPositions;
-                        FRCSysPosition sysPositionSIMU = fRCTPPositionsSIMU[3];
-                        FRCSysGroupPosition sysGroupPositionSIMU = sysPositionSIMU.Group[1];
-                        FRCXyzWpr xyzWprSIMU = sysGroupPositionSIMU.Formats[FRETypeCodeConstants.frXyzWpr];
+                        xyzWpr.X = float.Parse(values[0]);
+                        xyzWpr.Y = float.Parse(values[1]);
+                        xyzWpr.Z = float.Parse(values[2]);
+                        xyzWpr.W = float.Parse(values[3]);
+                        xyzWpr.P = float.Parse(values[4]);
+                        xyzWpr.R = float.Parse(values[5]);
 
-                        float x = float.Parse(values[0]);
-                        float y = float.Parse(values[1]);
-                        float z = float.Parse(values[2]);
-                        float w = float.Parse(values[3]);
-                        float p = float.Parse(values[4]);
-                        float r = float.Parse(values[5]);
-
-                        xyzWprSIMU.X = x;
-                        xyzWprSIMU.Y = y;
-                        xyzWprSIMU.Z = z;
-                        xyzWprSIMU.W = w;
-                        xyzWprSIMU.P = p;
-                        xyzWprSIMU.R = r;
-
-                        if (sysGroupPositionSIMU.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
+                        if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
                         {
-                            sysGroupPositionSIMU.Update();
-                            if (IOvalue == "True")
-                            {
-                                xyzWpr.X = x;
-                                xyzWpr.Y = y;
-                                xyzWpr.Z = z;
-                                xyzWpr.W = w;
-                                xyzWpr.P = p;
-                                xyzWpr.R = r;
-                                if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
-                                {
-                                    isReachable = true;
-                                    sysGroupPosition.Update();
-                                }
-                            }
-                            else
-                            {
-                                isReachable = false;
-                            }
+                            isReachable = true;
+                            sysGroupPosition.Update();
                         }
                         else
                         {
