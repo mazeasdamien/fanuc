@@ -135,8 +135,7 @@ namespace FanucRobotServer
                 var joint = (FRCJoint)groupPositionJoint.Formats[FRETypeCodeConstants.frJoint];
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                string message = $"{joint[1]:F4},{joint[2]:F4},{joint[3]:F4},{joint[4]:F4},{joint[5]:F4},{joint[6]:F4},{xyzWpr.X:F4},{xyzWpr.Y:F4},{xyzWpr.Z:F4},{xyzWpr.W:F4},{xyzWpr.P:F4},{xyzWpr.R:F4}";
-                //Console.WriteLine(message);
+                string message = $"{joint[1]:F1},{joint[2]:F1},{joint[3]:F1},{joint[4]:F1},{joint[5]:F1},{joint[6]:F1},{xyzWpr.X:F1},{xyzWpr.Y:F1},{xyzWpr.Z:F1},{xyzWpr.W:F1},{xyzWpr.P:F1},{xyzWpr.R:F1}";
 
                 if (previousReachability == null || previousReachability != isReachable)
                 {
@@ -147,6 +146,7 @@ namespace FanucRobotServer
 
                 if (previousMessage == null || previousMessage != message)
                 {
+                    Console.WriteLine(message);
                     SendDataToClient(message + "\n");
                     previousMessage = message;
                 }
