@@ -49,11 +49,11 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                xyzWpr.X = 900;
-                xyzWpr.Y = 0;
-                xyzWpr.Z = 840;
-                xyzWpr.W = -180;
-                xyzWpr.P = -60;
+                xyzWpr.X = 655;
+                xyzWpr.Y = -32;
+                xyzWpr.Z = 806;
+                xyzWpr.W = 0;
+                xyzWpr.P = -70;
                 xyzWpr.R = 0;
 
                 Thread.Sleep(500);
@@ -123,7 +123,6 @@ namespace FanucRobotServer
         private async Task SendDataToClientContinuously(CancellationToken cancellationToken)
         {
             string previousMessage = null;
-            bool? previousReachability = null;
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -137,12 +136,9 @@ namespace FanucRobotServer
 
                 string message = $"{joint[1]:F1},{joint[2]:F1},{joint[3]:F1},{joint[4]:F1},{joint[5]:F1},{joint[6]:F1},{xyzWpr.X:F1},{xyzWpr.Y:F1},{xyzWpr.Z:F1},{xyzWpr.W:F1},{xyzWpr.P:F1},{xyzWpr.R:F1}";
 
-                if (previousReachability == null || previousReachability != isReachable)
-                {
                     string messageReachability = $"{isReachable}";
                     SendDataToClient(messageReachability + "\n");
-                    previousReachability = isReachable;
-                }
+
 
                 if (previousMessage == null || previousMessage != message)
                 {
