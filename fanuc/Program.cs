@@ -206,30 +206,101 @@ namespace FanucRobotServer
                         string[] values = receivedData.Split(',');
                         //Console.WriteLine("Data received from client: " + receivedData);
 
-                        //real
-                        FRCSysPositions fRCTPPositions = _real_robot.RegPositions;
-                        FRCSysPosition sysPosition = fRCTPPositions[3];
-                        FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
-                        FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
-
-                        xyzWpr.X = float.Parse(values[0]);
-                        xyzWpr.Y = float.Parse(values[1]);
-                        xyzWpr.Z = float.Parse(values[2]);
-                        xyzWpr.W = float.Parse(values[3]);
-                        xyzWpr.P = float.Parse(values[4]);
-                        xyzWpr.R = float.Parse(values[5]);
-
-                        if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
+                        if (values.Length == 6)
                         {
-                            isReachable = true;
-                            sysGroupPosition.Update();
+                            //real
+                            FRCSysPositions fRCTPPositions = _real_robot.RegPositions;
+                            FRCSysPosition sysPosition = fRCTPPositions[3];
+                            FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
+                            FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
+
+                            xyzWpr.X = float.Parse(values[0]);
+                            xyzWpr.Y = float.Parse(values[1]);
+                            xyzWpr.Z = float.Parse(values[2]);
+                            xyzWpr.W = float.Parse(values[3]);
+                            xyzWpr.P = float.Parse(values[4]);
+                            xyzWpr.R = float.Parse(values[5]);
+
+                            if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
+                            {
+                                isReachable = true;
+                                sysGroupPosition.Update();
+                            }
+                            else
+                            {
+                                isReachable = false;
+                            }
                         }
-                        else
+                        else if (receivedData.Trim() == "run")
                         {
-                            isReachable = false;
+                            Console.WriteLine("Run command received");
+                            FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
+                            FRCTasks mobjTasksREAL = _real_robot.Tasks;
+                            FRCPrograms fRCProgramsREAL = _real_robot.Programs;
+
+                            Thread.Sleep(500);
+
+                            FRCSysPositions fRCTPPositions = _real_robot.RegPositions;
+                            FRCSysPosition sysPosition = fRCTPPositions[3];
+                            FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
+                            FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
+
+                            xyzWpr.X = 655;
+                            xyzWpr.Y = -32;
+                            xyzWpr.Z = 806;
+                            xyzWpr.W = 0;
+                            xyzWpr.P = -70;
+                            xyzWpr.R = 0;
+
+                            Thread.Sleep(500);
+                            sysGroupPosition.Update();
+                            Thread.Sleep(500);
+
+                            Thread.Sleep(500);
+                            mobjTasksREAL.AbortAll();
+                            Thread.Sleep(500);
+                            fRCAlarmsREAL.Reset();
+                            fRCProgramsREAL.Selected = "DAMIEN";
+                            FRCTPProgram fRCProgramREAL = (FRCTPProgram)fRCProgramsREAL[fRCProgramsREAL.Selected, Type.Missing, Type.Missing];
+                            fRCProgramREAL.Run();
+                            Console.WriteLine("Program Damien real robot started.");
+                        }
+                        else if (receivedData.Trim() == "reset")
+                        {
+                            Console.WriteLine("Reset command received");
+                            FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
+                            fRCAlarmsREAL.Reset();
+                        }
+                        else if (receivedData.Trim() == "stop")
+                        {
+                            Console.WriteLine("Stop command received");
+                            FRCTasks mobjTasksREAL = _real_robot.Tasks;
+                            mobjTasksREAL.AbortAll();
+                        }
+                        else if (receivedData.Trim() == "home")
+                        {
+                            Console.WriteLine("Home command received");
+                            Thread.Sleep(500);
+
+                            FRCSysPositions fRCTPPositions = _real_robot.RegPositions;
+                            FRCSysPosition sysPosition = fRCTPPositions[3];
+                            FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
+                            FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
+
+                            xyzWpr.X = 655;
+                            xyzWpr.Y = -32;
+                            xyzWpr.Z = 806;
+                            xyzWpr.W = 0;
+                            xyzWpr.P = -70;
+                            xyzWpr.R = 0;
+
+                            Thread.Sleep(500);
+                            sysGroupPosition.Update();
+                            Thread.Sleep(500);
+
                         }
                     }
-                }
+                 }
             }
             catch (IOException ex)
             {
