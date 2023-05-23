@@ -49,12 +49,12 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                xyzWpr.X = 655;
-                xyzWpr.Y = -32;
-                xyzWpr.Z = 806;
+                xyzWpr.X = 630;
+                xyzWpr.Y = -70;
+                xyzWpr.Z = 835.273;
                 xyzWpr.W = 0;
-                xyzWpr.P = -70;
-                xyzWpr.R = 0;
+                xyzWpr.P = 62.596;
+                xyzWpr.R = -180;
 
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
@@ -142,7 +142,7 @@ namespace FanucRobotServer
 
                 if (previousMessage == null || previousMessage != message)
                 {
-                    Console.WriteLine(message);
+                    //Console.WriteLine(message);
                     SendDataToClient(message + "\n");
                     previousMessage = message;
                 }
@@ -245,12 +245,12 @@ namespace FanucRobotServer
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                            xyzWpr.X = 655;
-                            xyzWpr.Y = -32;
-                            xyzWpr.Z = 806;
+                            xyzWpr.X = 630;
+                            xyzWpr.Y = -70;
+                            xyzWpr.Z = 835.273;
                             xyzWpr.W = 0;
-                            xyzWpr.P = -70;
-                            xyzWpr.R = 0;
+                            xyzWpr.P = 62.596;
+                            xyzWpr.R = -180;
 
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
@@ -287,12 +287,12 @@ namespace FanucRobotServer
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                            xyzWpr.X = 655;
-                            xyzWpr.Y = -32;
-                            xyzWpr.Z = 806;
+                            xyzWpr.X = 630;
+                            xyzWpr.Y = -70;
+                            xyzWpr.Z = 835.273;
                             xyzWpr.W = 0;
-                            xyzWpr.P = -70;
-                            xyzWpr.R = 0;
+                            xyzWpr.P = 62.596;
+                            xyzWpr.R = -180;
 
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
