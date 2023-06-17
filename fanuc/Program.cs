@@ -36,8 +36,8 @@ namespace FanucRobotServer
             try
             {
                 _real_robot = new FRCRobot();
-                //_real_robot.ConnectEx("192.168.1.20", false, 10, 1);
-                _real_robot.ConnectEx("127.0.0.1", false, 10, 1);
+                _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
+                //_real_robot.ConnectEx("127.0.0.1", false, 10, 1);
                 Console.WriteLine("Connected to real robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
                 FRCTasks mobjTasksREAL = _real_robot.Tasks;
@@ -50,12 +50,23 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
+                //my expe
+                /*
                 xyzWpr.X = 630;
                 xyzWpr.Y = -70;
                 xyzWpr.Z = 835.273;
                 xyzWpr.W = 0;
                 xyzWpr.P = 62.596;
                 xyzWpr.R = -180;
+                */
+
+                //chatGPT
+                xyzWpr.X = 1200;
+                xyzWpr.Y = 50;
+                xyzWpr.Z = 900;
+                xyzWpr.W = 0;
+                xyzWpr.P = 0;
+                xyzWpr.R = 90;
 
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
@@ -143,7 +154,7 @@ namespace FanucRobotServer
 
                 if (previousMessage == null || previousMessage != message)
                 {
-                    //Console.WriteLine(message);
+                    Console.WriteLine(message);
                     SendDataToClient(message + "\n");
                     previousMessage = message;
                 }
