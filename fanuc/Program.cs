@@ -51,24 +51,22 @@ namespace FanucRobotServer
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
                 //my expe
-                /*
                 xyzWpr.X = 630;
                 xyzWpr.Y = -70;
                 xyzWpr.Z = 835.273;
                 xyzWpr.W = 0;
                 xyzWpr.P = 62.596;
                 xyzWpr.R = -180;
-                */
 
                 //chatGPT
-                
+                /*
                 xyzWpr.X = 1200;
                 xyzWpr.Y = 50;
                 xyzWpr.Z = 900;
                 xyzWpr.W = 0;
                 xyzWpr.P = 0;
                 xyzWpr.R = 90;
-                
+                */
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
                 Thread.Sleep(500);
@@ -298,23 +296,23 @@ namespace FanucRobotServer
                             FRCSysPosition sysPosition = fRCTPPositions[3];
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
-                            /*
+                            
                             xyzWpr.X = 630;
                             xyzWpr.Y = -70;
                             xyzWpr.Z = 835.273;
                             xyzWpr.W = 0;
                             xyzWpr.P = 62.596;
-                            xyzWpr.R = -180;*/
+                            xyzWpr.R = -180;
 
                             //chatGPT
-
+                            /*
                             xyzWpr.X = 1200;
                             xyzWpr.Y = 50;
                             xyzWpr.Z = 900;
                             xyzWpr.W = 0;
                             xyzWpr.P = 0;
                             xyzWpr.R = 90;
-
+                            */
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
                             Thread.Sleep(500);
