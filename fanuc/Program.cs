@@ -22,6 +22,7 @@ namespace FanucRobotServer
         private FRCXyzWpr _prevXyzWpr;
         private FRCIOTypes IOTypes;
         private bool isReachable = true;
+        public string unity_prompt;
 
         public TCPServer(int port)
         {
@@ -319,6 +320,10 @@ namespace FanucRobotServer
                             sysGroupPosition.Update();
                             Thread.Sleep(500);
 
+                        }
+                        else if (values.Length == 2)
+                        {
+                            //prompt_unity = ...
                         }
                     }
                  }
