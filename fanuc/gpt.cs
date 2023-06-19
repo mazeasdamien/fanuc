@@ -6,12 +6,29 @@ using System.Threading.Tasks;
 
 namespace FanucRobotServer
 {
-    public class gpt
+    public class GPT
     {
+        /// <summary>
+        /// Get prompts from Unity string inputs interface
+        /// </summary>
+        /// <param name="server"></param>
+        /// <returns>
+        /// A prompt string 
+        /// </returns>
         public string GetPromptFromUnity(TCPServer server)
         {
-            /* Get prompts from unity interface */
             return server.unity_prompt;
         }
+
+        public void SendPromptToGPT(string prompt)
+        { 
+
+        }
+
+        public void ReceivePromptFromGPT()
+        {
+
+        }
+
     }
 }
