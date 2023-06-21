@@ -151,7 +151,7 @@ namespace FanucRobotServer
 
                 if (previousMessage == null || previousMessage != message)
                 {
-                    //Console.WriteLine(message);
+                    Console.WriteLine(message);
                     SendDataToClient(message + "\n");
                     previousMessage = message;
                 }
