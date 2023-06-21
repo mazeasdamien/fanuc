@@ -37,8 +37,7 @@ namespace FanucRobotServer
             try
             {
                 _real_robot = new FRCRobot();
-                _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
-                //_real_robot.ConnectEx("127.0.0.1", false, 10, 1);
+                _real_robot.ConnectEx("192.168.1.20", false, 10, 1);  
                 Console.WriteLine("Connected to real robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
                 FRCTasks mobjTasksREAL = _real_robot.Tasks;
@@ -300,9 +299,10 @@ namespace FanucRobotServer
                             Thread.Sleep(500);
 
                         }
-                        else if (values.Length == 2)
+                        else if (values.Length == 1) // PRONPT MUST BE WITHOUT COMMA 
                         {
-                            //prompt_unity = ...
+                            unity_prompt = values[0];
+                            Console.WriteLine("Unity prompt message received: " + unity_prompt);
                         }
                     }
                  }
