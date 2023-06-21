@@ -60,7 +60,10 @@ namespace FanucRobotServer
                 xyzWpr.P = 62.596;
                 xyzWpr.R = -180;
                 */
+<<<<<<< Updated upstream
 
+=======
+>>>>>>> Stashed changes
                 //chatGPT
                 
                 xyzWpr.X = 1200;
@@ -305,17 +308,28 @@ namespace FanucRobotServer
                             xyzWpr.Z = 835.273;
                             xyzWpr.W = 0;
                             xyzWpr.P = 62.596;
+<<<<<<< Updated upstream
                             xyzWpr.R = -180;*/
 
                             //chatGPT
 
+=======
+                            xyzWpr.R = -180;
+                            */
+                            //chatGPT
+                            
+>>>>>>> Stashed changes
                             xyzWpr.X = 1200;
                             xyzWpr.Y = 50;
                             xyzWpr.Z = 900;
                             xyzWpr.W = 0;
                             xyzWpr.P = 0;
                             xyzWpr.R = 90;
+<<<<<<< Updated upstream
 
+=======
+                            
+>>>>>>> Stashed changes
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
                             Thread.Sleep(500);
