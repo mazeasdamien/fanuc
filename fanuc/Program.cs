@@ -51,21 +51,10 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                //my expe
-                /*
-                xyzWpr.X = 630;
-                xyzWpr.Y = -70;
-                xyzWpr.Z = 835.273;
-                xyzWpr.W = 0;
-                xyzWpr.P = 62.596;
-                xyzWpr.R = -180;
-                */
-                //chatGPT
-                
-                xyzWpr.X = 1200;
-                xyzWpr.Y = 50;
-                xyzWpr.Z = 900;
-                xyzWpr.W = 0;
+                xyzWpr.X = 1133;
+                xyzWpr.Y = 400;
+                xyzWpr.Z = 1060;
+                xyzWpr.W = -10;
                 xyzWpr.P = 0;
                 xyzWpr.R = 90;
                 
@@ -154,7 +143,7 @@ namespace FanucRobotServer
 
                 if (previousMessage == null || previousMessage != message)
                 {
-                    Console.WriteLine(message);
+                    //Console.WriteLine(message);
                     SendDataToClient(message + "\n");
                     previousMessage = message;
                 }
@@ -257,12 +246,12 @@ namespace FanucRobotServer
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                            xyzWpr.X = 630;
-                            xyzWpr.Y = -70;
-                            xyzWpr.Z = 835.273;
-                            xyzWpr.W = 0;
-                            xyzWpr.P = 62.596;
-                            xyzWpr.R = -180;
+                            xyzWpr.X = 1133;
+                            xyzWpr.Y = 400;
+                            xyzWpr.Z = 1060;
+                            xyzWpr.W = -10;
+                            xyzWpr.P = 0;
+                            xyzWpr.R = 90;
 
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
@@ -298,19 +287,11 @@ namespace FanucRobotServer
                             FRCSysPosition sysPosition = fRCTPPositions[3];
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
-                            /*
-                            xyzWpr.X = 630;
-                            xyzWpr.Y = -70;
-                            xyzWpr.Z = 835.273;
-                            xyzWpr.W = 0;
-                            xyzWpr.P = 62.596;
-                            xyzWpr.R = -180;*/
 
-                            //chatGPT
-                            xyzWpr.X = 1200;
-                            xyzWpr.Y = 50;
-                            xyzWpr.Z = 900;
-                            xyzWpr.W = 0;
+                            xyzWpr.X = 1133;
+                            xyzWpr.Y = 400;
+                            xyzWpr.Z = 1060;
+                            xyzWpr.W = -10;
                             xyzWpr.P = 0;
                             xyzWpr.R = 90;
 
