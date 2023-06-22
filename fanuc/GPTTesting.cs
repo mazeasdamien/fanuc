@@ -56,33 +56,33 @@ class GPTTesting
         File.WriteAllText(path, response);
     }
 
-    static async Task Main(string[] args)
-    {
-        string key_json_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\openai_api_key.txt";
-        var openai_api_key = ReadFromTxtFile(key_json_path);
-        //Console.WriteLine(openai_api_key);
+    //static async Task Main(string[] args)
+    //{
+    //    string key_json_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\openai_api_key.txt";
+    //    var openai_api_key = ReadFromTxtFile(key_json_path);
+    //    //Console.WriteLine(openai_api_key);
 
-        string prompt_template_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\prompt_template.txt";
-        var prompt_template = ReadFromTxtFile(prompt_template_path);
-        //Console.WriteLine(prompt_template.ToString());
+    //    string prompt_template_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\prompt_template.txt";
+    //    var prompt_template = ReadFromTxtFile(prompt_template_path);
+    //    //Console.WriteLine(prompt_template.ToString());
 
-        Console.WriteLine("Please give a command to draw a trajectory ");
-        var command = Console.ReadLine();
-        string prompt = FillPromptTemplate(prompt_template, command);
-        Console.WriteLine(prompt);
+    //    Console.WriteLine("Please give a command to draw a trajectory ");
+    //    var command = Console.ReadLine();
+    //    string prompt = FillPromptTemplate(prompt_template, command);
+    //    Console.WriteLine(prompt);
 
-        Console.WriteLine("The prompt is sent to GPT, waiting response... ");
-        string response = await GetResponseFromGPT(openai_api_key, prompt);
-        Console.WriteLine(response);
+    //    Console.WriteLine("The prompt is sent to GPT, waiting response... ");
+    //    string response = await GetResponseFromGPT(openai_api_key, prompt);
+    //    Console.WriteLine(response);
 
-        string temp_result_file = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\temp_result.txt";
-        Console.WriteLine("Saving the result to the file...");
-        File.WriteAllText(temp_result_file, response);
-        Console.WriteLine("The result is saved into a given file.");
+    //    string temp_result_file = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\txt\\temp_result.txt";
+    //    Console.WriteLine("Saving the result to the file...");
+    //    File.WriteAllText(temp_result_file, response);
+    //    Console.WriteLine("The result is saved into a given file.");
 
-        string result_json_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\json\\trajectory.json";
-        Console.WriteLine("Saving the result to the file...");
-        SaveResult(result_json_path, response);
-        Console.WriteLine("The result is converted into .json file.");
-    }
+    //    string result_json_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\json\\trajectory.json";
+    //    Console.WriteLine("Saving the result to the file...");
+    //    SaveResult(result_json_path, response);
+    //    Console.WriteLine("The result is converted into .json file.");
+    //}
 }
