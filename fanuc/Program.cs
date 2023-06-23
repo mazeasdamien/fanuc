@@ -11,7 +11,7 @@ namespace FanucRobotServer
         static void Main(string[] args)
         {
             int port = 5000;
-            TCPServer server = new TCPServer(port);
+            TCPServer server = new(port);
 
             server.Start();
 
@@ -24,15 +24,13 @@ namespace FanucRobotServer
 
     public class TCPServer
     {
-        private TcpListener _server;
-        private IPAddress _localAddr;
-        private int _port;
+        private readonly TcpListener _server;
+        private readonly IPAddress _localAddr;
+        private readonly int _port;
         private FRCRobot _real_robot;
-        private ConcurrentDictionary<TcpClient, byte> _clients = new ConcurrentDictionary<TcpClient, byte>();
-        private CancellationTokenSource _cts = new CancellationTokenSource();
-        private FRCJoint _prevJoint;
-        private FRCXyzWpr _prevXyzWpr;
-        private FRCIOTypes IOTypes;
+        private readonly ConcurrentDictionary<TcpClient, byte> _clients = new();
+        private readonly CancellationTokenSource _cts = new();
+        private readonly FRCIOTypes IOTypes;
         private bool isReachable = true;
         public string unity_cmd;
 
@@ -128,13 +126,12 @@ namespace FanucRobotServer
             Console.WriteLine("Client disconnected");
 
             // Remove the disconnected client from the clients dictionary
-            byte removed;
-            _clients.TryRemove(client, out removed);
+            _clients.TryRemove(client, out _);
         }
 
         private async Task SendDataToClientContinuously(CancellationToken cancellationToken)
         {
-            string previousMessage = null;
+            string? previousMessage = null;
 
             while (!cancellationToken.IsCancellationRequested)
             {
@@ -167,7 +164,7 @@ namespace FanucRobotServer
         private void SendDataToClient(string message)
         {
             // Check if there are any clients in the dictionary before sending the message
-            if (_clients.Count > 0)
+            if (!_clients.IsEmpty)
             {
                 foreach (TcpClient client in _clients.Keys)
                 {
@@ -319,22 +316,22 @@ namespace FanucRobotServer
                             // This will start the execution of the long-running operation asynchronously, on another thread
                             Task.Run(async () =>
                             {
-                                GPT gpt = new GPT();
+                                GPT gpt = new();
 
                                 string key_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\json\\openai_api_key.json";
-                                string openai_api_key = gpt.LoadOpenAIKey(key_path);
+                                string openai_api_key = GPT.LoadOpenAIKey(key_path);
 
                                 string prompt_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\txt\\prompt_template.txt";
-                                string prompt_template = gpt.LoadPromptTemplate(prompt_path);
+                                string prompt_template = GPT.LoadPromptTemplate(prompt_path);
 
-                                string prompt = gpt.ConstructPrompt(prompt_template, unity_cmd);
+                                string prompt = GPT.ConstructPrompt(prompt_template, unity_cmd);
                                 Console.WriteLine("The prompt is sent to GPT, waiting response... ");
-                                string response = await gpt.GetResponseFromGPT(openai_api_key, prompt, "gpt-3.5-turbo");
+                                string response = await GPT.GetResponseFromGPT(openai_api_key, prompt, "gpt-3.5-turbo");
                                 //Console.WriteLine(response);
 
                                 string json_path = "C:\\Users\\s345471\\OneDrive - Cranfield University\\Desktop\\experiment2_cranfieldVR\\Assets\\StreamingAssets\\RobotData.json";
                                 Console.WriteLine("Saving the result to the file...");
-                                gpt.SaveResult(json_path, response);
+                                GPT.SaveResult(json_path, response);
                                 Console.WriteLine("Successfully updated the trajectory json file.");
                             });
                         }

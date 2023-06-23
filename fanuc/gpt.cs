@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using OpenAI_API;
 using OpenAI_API.Chat;
 
@@ -20,7 +15,7 @@ namespace FanucRobotServer
         /// <returns>
         /// A prompt string 
         /// </returns>
-        public string GetPromptFromUnity(TCPServer server)
+        public static string GetPromptFromUnity(TCPServer server)
         {
             return server.unity_cmd;
         }
@@ -34,9 +29,9 @@ namespace FanucRobotServer
         /// The key in string
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="FileNotFoundException"></exception>
-        public string LoadOpenAIKey(string key_path)
+        public static string LoadOpenAIKey(string key_path)
         {
-            if (string.IsNullOrEmpty(key_path)) { throw new ArgumentNullException(); }
+            if (string.IsNullOrEmpty(key_path)) { ArgumentNullException argumentNullException = new(); throw argumentNullException; }
             if (!File.Exists(key_path)) { throw new FileNotFoundException(); }
 
             string json_text = File.ReadAllText(key_path);
@@ -48,7 +43,7 @@ namespace FanucRobotServer
                 key = json_obj["key"];
                 if (!string.IsNullOrEmpty(key))
                 {
-                    Console.WriteLine("Key loaded successfully: " + key.Substring(0, 5) + "..."); // prints the first 5 characters
+                    Console.WriteLine("Key loaded successfully: " + key[..5] + "..."); // prints the first 5 characters
                 }
                 else
                 {
@@ -73,9 +68,9 @@ namespace FanucRobotServer
         /// The prompt template in string
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="FileNotFoundException"></exception>
-        public string LoadPromptTemplate(string path)
+        public static string LoadPromptTemplate(string path)
         {
-            if (string.IsNullOrEmpty(path)) {  throw new ArgumentNullException(); }
+            if (string.IsNullOrEmpty(path)) { throw new ArgumentNullException(); }
             if (!File.Exists(path)) { throw new FileNotFoundException(path); }
 
             return File.ReadAllText(path);
@@ -93,17 +88,18 @@ namespace FanucRobotServer
         /// <returns></returns>
         /// A prompt in single string
         /// <exception cref="ArgumentNullException"></exception>
-        public string ConstructPrompt(string promp_tmp, string cmd)
+        public static string ConstructPrompt(string promp_tmp, string cmd)
         {
-            if (string.IsNullOrEmpty(promp_tmp)) {
+            if (string.IsNullOrEmpty(promp_tmp))
+            {
                 Console.WriteLine("Please set up the prompt template.");
                 throw new ArgumentNullException(nameof(promp_tmp));
             }
-            
+
             string prompt;
             string stay_cmd = "Please stay in the same location.";
             if (!string.IsNullOrEmpty(cmd)) { prompt = promp_tmp + cmd; }
-            else {prompt = promp_tmp + stay_cmd; }
+            else { prompt = promp_tmp + stay_cmd; }
 
             return prompt;
         }
@@ -116,7 +112,7 @@ namespace FanucRobotServer
         /// <param name="prompt"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<string> GetResponseFromGPT(string key, string prompt, string modelId)
+        public static async Task<string> GetResponseFromGPT(string key, string prompt, string modelId)
         {
             if (string.IsNullOrEmpty(prompt)) { throw new ArgumentNullException(nameof(prompt)); }
 
@@ -143,7 +139,7 @@ namespace FanucRobotServer
                 throw;
             }
         }
-        
+
 
         /// <summary>
         /// Save and update the generated path into a given json file
@@ -151,7 +147,7 @@ namespace FanucRobotServer
         /// <param name="path"></param>
         /// <param name="response"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        public void SaveResult(string path, string response)
+        public static void SaveResult(string path, string response)
         {
             if (string.IsNullOrEmpty(path)) { throw new ArgumentNullException(nameof(path)); }
 
