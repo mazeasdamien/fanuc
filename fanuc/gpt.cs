@@ -111,10 +111,30 @@ namespace FanucRobotServer
             var openai = new OpenAIAPI(new APIAuthentication(key));
             var conversation = openai.Chat.CreateConversation();
             conversation.AppendUserInput(prompt);
-            string response = await conversation.GetResponseFromChatbotAsync();
+
+            string response = string.Empty;
+            int retryCount = 0;
+            TimeSpan delay = TimeSpan.FromSeconds(1);
+
+            while (retryCount < 5)
+            {
+                try
+                {
+                    response = await conversation.GetResponseFromChatbotAsync();
+                    break; // Success! Break out of the loop.
+                }
+                catch (HttpRequestException ex) when (ex.Message.Contains("TooManyRequests"))
+                {
+                    // Too many requests, let's wait a bit then retry
+                    await Task.Delay(delay);
+                    retryCount++;
+                    delay = delay * 2; // Exponential backoff
+                }
+            }
 
             return response;
         }
+
 
         /// <summary>
         /// Save and update the generated path into a given json file

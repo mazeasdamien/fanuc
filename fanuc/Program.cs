@@ -8,32 +8,16 @@ namespace FanucRobotServer
 {
     class Program
     {
-        static async void Main(string[] args)
+        static void Main(string[] args)
         {
             int port = 5000;
             TCPServer server = new TCPServer(port);
-            GPT gpt = new GPT();
-
-            string key_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\json\\openai_api_key.json";
-            string openai_api_key = gpt.LoadOpenAIKey(key_path);
-
-            string prompt_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\txt\\prompt_template.txt";
-            string prompt_template = gpt.LoadPromptTemplate(prompt_path);
-
-            string prompt = gpt.ConstructPrompt(prompt_template, server.unity_cmd);
-
-            Console.WriteLine("The prompt is sent to GPT, waiting response... ");
-            string response = await gpt.GetResponseFromGPT(openai_api_key, prompt);
-            Console.WriteLine(response);
-
-            string json_path = "C:\\Users\\OpEx - Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\json\\trajectory.json";
-            Console.WriteLine("Saving the result to the file...");
-            gpt.SaveResult(json_path, response);
-            Console.WriteLine("Successfully updated the trajectory json file.");
 
             server.Start();
+
             Console.WriteLine("CTRL + C to stop the server...");
             Console.ReadLine();
+
             server.Stop();
         }
     }
@@ -331,6 +315,29 @@ namespace FanucRobotServer
                         {
                             unity_cmd = values[0];
                             Console.WriteLine("Unity prompt message received: " + unity_cmd);
+
+                            // This will start the execution of the long-running operation asynchronously, on another thread
+                            Task.Run(async () =>
+                            {
+                                GPT gpt = new GPT();
+
+                                string key_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\json\\openai_api_key.json";
+                                string openai_api_key = gpt.LoadOpenAIKey(key_path);
+
+                                string prompt_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\txt\\prompt_template.txt";
+                                string prompt_template = gpt.LoadPromptTemplate(prompt_path);
+
+                                string prompt = gpt.ConstructPrompt(prompt_template, unity_cmd);
+
+                                Console.WriteLine("The prompt is sent to GPT, waiting response... ");
+                                string response = await gpt.GetResponseFromGPT(openai_api_key, prompt);
+                                Console.WriteLine(response);
+
+                                string json_path = "C:\\Users\\s345471\\OneDrive - Cranfield University\\Desktop\\experiment2_cranfieldVR\\build\\Fanuc_gpt_Data\\StreamingAssets\\RobotData.json";
+                                Console.WriteLine("Saving the result to the file...");
+                                gpt.SaveResult(json_path, response);
+                                Console.WriteLine("Successfully updated the trajectory json file.");
+                            });
                         }
                     }
                 }
