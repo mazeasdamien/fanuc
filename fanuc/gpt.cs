@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using OpenAI_API;
+using OpenAI_API.Chat;
 
 namespace FanucRobotServer
 {
@@ -115,19 +116,26 @@ namespace FanucRobotServer
         /// <param name="prompt"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public async Task<string> GetResponseFromGPT(string key, string prompt)
+        public async Task<string> GetResponseFromGPT(string key, string prompt, string modelId)
         {
             if (string.IsNullOrEmpty(prompt)) { throw new ArgumentNullException(nameof(prompt)); }
 
             try
             {
                 var openai = new OpenAIAPI(new APIAuthentication(key));
-                var conversation = openai.Chat.CreateConversation();
-                conversation.AppendUserInput(prompt);
-                //Console.WriteLine(prompt);
-                string response = await conversation.GetResponseFromChatbotAsync();
 
-                return response;
+                var request = new ChatRequest()
+                {
+                    Model = modelId,
+                    Messages = new ChatMessage[] {
+                new ChatMessage(ChatMessageRole.User, prompt)
+            }
+                };
+
+                var result = await openai.Chat.CreateChatCompletionAsync(request);
+                var reply = result.Choices[0].Message;
+
+                return $"{reply.Role}: {reply.Content.Trim()}";
             }
             catch (Exception ex)
             {
@@ -135,8 +143,7 @@ namespace FanucRobotServer
                 throw;
             }
         }
-
-
+        
 
         /// <summary>
         /// Save and update the generated path into a given json file
