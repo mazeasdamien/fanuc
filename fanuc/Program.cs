@@ -328,10 +328,9 @@ namespace FanucRobotServer
                                 string prompt_template = gpt.LoadPromptTemplate(prompt_path);
 
                                 string prompt = gpt.ConstructPrompt(prompt_template, unity_cmd);
-
                                 Console.WriteLine("The prompt is sent to GPT, waiting response... ");
                                 string response = await gpt.GetResponseFromGPT(openai_api_key, prompt);
-                                Console.WriteLine(response);
+                                //Console.WriteLine(response);
 
                                 string json_path = "C:\\Users\\s345471\\OneDrive - Cranfield University\\Desktop\\experiment2_cranfieldVR\\build\\Fanuc_gpt_Data\\StreamingAssets\\RobotData.json";
                                 Console.WriteLine("Saving the result to the file...");

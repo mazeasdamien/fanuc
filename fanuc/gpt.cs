@@ -42,15 +42,26 @@ namespace FanucRobotServer
             dynamic? json_obj = JsonConvert.DeserializeObject(json_text);
 
             string key = string.Empty;
-            if (json_obj != null) {
+            if (json_obj != null)
+            {
                 key = json_obj["key"];
+                if (!string.IsNullOrEmpty(key))
+                {
+                    Console.WriteLine("Key loaded successfully: " + key.Substring(0, 5) + "..."); // prints the first 5 characters
+                }
+                else
+                {
+                    Console.WriteLine("No key is provided in the file.");
+                }
             }
-            else { 
-                Console.WriteLine("No key is provided."); 
+            else
+            {
+                Console.WriteLine("No key is provided.");
             }
 
             return key;
         }
+
 
         /// <summary>
         /// Read a configurated prompt template from a text file
@@ -108,32 +119,23 @@ namespace FanucRobotServer
         {
             if (string.IsNullOrEmpty(prompt)) { throw new ArgumentNullException(nameof(prompt)); }
 
-            var openai = new OpenAIAPI(new APIAuthentication(key));
-            var conversation = openai.Chat.CreateConversation();
-            conversation.AppendUserInput(prompt);
-
-            string response = string.Empty;
-            int retryCount = 0;
-            TimeSpan delay = TimeSpan.FromSeconds(1);
-
-            while (retryCount < 5)
+            try
             {
-                try
-                {
-                    response = await conversation.GetResponseFromChatbotAsync();
-                    break; // Success! Break out of the loop.
-                }
-                catch (HttpRequestException ex) when (ex.Message.Contains("TooManyRequests"))
-                {
-                    // Too many requests, let's wait a bit then retry
-                    await Task.Delay(delay);
-                    retryCount++;
-                    delay = delay * 2; // Exponential backoff
-                }
-            }
+                var openai = new OpenAIAPI(new APIAuthentication(key));
+                var conversation = openai.Chat.CreateConversation();
+                conversation.AppendUserInput(prompt);
+                //Console.WriteLine(prompt);
+                string response = await conversation.GetResponseFromChatbotAsync();
 
-            return response;
+                return response;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error encountered: {ex.Message}");
+                throw;
+            }
         }
+
 
 
         /// <summary>
@@ -146,7 +148,24 @@ namespace FanucRobotServer
         {
             if (string.IsNullOrEmpty(path)) { throw new ArgumentNullException(nameof(path)); }
 
-            File.WriteAllText(path, response);
+            // Find the first { and last } in the response
+            int firstBrace = response.IndexOf('{');
+            int lastBrace = response.LastIndexOf('}');
+
+            // If both braces were found, extract the substring between them
+            if (firstBrace >= 0 && lastBrace >= 0 && lastBrace > firstBrace)
+            {
+                string json = response.Substring(firstBrace, lastBrace - firstBrace + 1);
+
+                // Save the extracted JSON
+                File.WriteAllText(path, json);
+            }
+            else
+            {
+                // Handle the case where the response doesn't contain valid JSON
+                Console.WriteLine("Invalid JSON response: " + response);
+            }
         }
+
     }
 }
