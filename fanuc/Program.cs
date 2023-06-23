@@ -332,7 +332,7 @@ namespace FanucRobotServer
                                 string response = await gpt.GetResponseFromGPT(openai_api_key, prompt);
                                 //Console.WriteLine(response);
 
-                                string json_path = "C:\\Users\\s345471\\OneDrive - Cranfield University\\Desktop\\experiment2_cranfieldVR\\build\\Fanuc_gpt_Data\\StreamingAssets\\RobotData.json";
+                                string json_path = "C:\\Users\\s345471\\OneDrive - Cranfield University\\Desktop\\experiment2_cranfieldVR\\Assets\\StreamingAssets\\RobotData.json";
                                 Console.WriteLine("Saving the result to the file...");
                                 gpt.SaveResult(json_path, response);
                                 Console.WriteLine("Successfully updated the trajectory json file.");
