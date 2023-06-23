@@ -21,7 +21,7 @@ namespace FanucRobotServer
         /// </returns>
         public string GetPromptFromUnity(TCPServer server)
         {
-            return server.unity_prompt;
+            return server.unity_cmd;
         }
 
         /// <summary>
@@ -42,11 +42,12 @@ namespace FanucRobotServer
             dynamic? json_obj = JsonConvert.DeserializeObject(json_text);
 
             string key = string.Empty;
-            if (json_obj != null)
-            {
+            if (json_obj != null) {
                 key = json_obj["key"];
             }
-            else { Console.WriteLine("No key is provided."); }
+            else { 
+                Console.WriteLine("No key is provided."); 
+            }
 
             return key;
         }
@@ -60,7 +61,7 @@ namespace FanucRobotServer
         /// The prompt template in string
         /// <exception cref="ArgumentNullException"></exception>
         /// <exception cref="FileNotFoundException"></exception>
-        static string ReadPromptTemplate(string path)
+        public string LoadPromptTemplate(string path)
         {
             if (string.IsNullOrEmpty(path)) {  throw new ArgumentNullException(); }
             if (!File.Exists(path)) { throw new FileNotFoundException(path); }
@@ -80,7 +81,7 @@ namespace FanucRobotServer
         /// <returns></returns>
         /// A prompt in single string
         /// <exception cref="ArgumentNullException"></exception>
-        static string ConstructPrompt(string promp_tmp, string cmd)
+        public string ConstructPrompt(string promp_tmp, string cmd)
         {
             if (string.IsNullOrEmpty(promp_tmp)) {
                 Console.WriteLine("Please set up the prompt template.");
@@ -103,7 +104,7 @@ namespace FanucRobotServer
         /// <param name="prompt"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        static async Task<string> GetResponseFromGPT(string key, string prompt)
+        public async Task<string> GetResponseFromGPT(string key, string prompt)
         {
             if (string.IsNullOrEmpty(prompt)) { throw new ArgumentNullException(nameof(prompt)); }
 
@@ -121,7 +122,7 @@ namespace FanucRobotServer
         /// <param name="path"></param>
         /// <param name="response"></param>
         /// <exception cref="ArgumentNullException"></exception>
-        static void SaveResult(string path, string response)
+        public void SaveResult(string path, string response)
         {
             if (string.IsNullOrEmpty(path)) { throw new ArgumentNullException(nameof(path)); }
 

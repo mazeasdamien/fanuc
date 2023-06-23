@@ -1,7 +1,5 @@
 ﻿using OpenAI_API;
-using System.IO;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using System.Text;
 using Aspose.Cells;
 
