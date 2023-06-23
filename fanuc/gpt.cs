@@ -20,17 +20,21 @@ namespace FanucRobotServer
             {
                 var openai = new OpenAIAPI(new APIAuthentication(key));
 
+                // Exclude the first message (initial assistant statement) from truncation
+                var messagesToTruncate = chatHistory.Skip(1).ToList();
+                var truncatedMessages = TruncateChatHistory(messagesToTruncate);
+
                 var request = new ChatRequest()
                 {
                     Model = modelId,
-                    Messages = chatHistory.ToArray()
+                    Messages = truncatedMessages.ToArray()
                 };
 
                 var result = await openai.Chat.CreateChatCompletionAsync(request);
                 var reply = result.Choices[0].Message.Content;
 
                 // Add the reply to the chat history
-                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = reply });
+                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.System, Content = reply });
 
                 return $"{reply.Trim()}";
             }
@@ -75,5 +79,38 @@ namespace FanucRobotServer
             }
         }
 
+        private static List<ChatMessage> TruncateChatHistory(List<ChatMessage> chatHistory)
+        {
+            const int MaxChatTokens = 4096;
+            const int TokenBuffer = 32;
+
+            var totalTokens = chatHistory.Sum(msg => msg.Content.Split(' ').Length);
+            var tokensToKeep = MaxChatTokens - TokenBuffer;
+
+            if (totalTokens <= tokensToKeep)
+            {
+                // No truncation required
+                return chatHistory;
+            }
+
+            var truncatedHistory = new List<ChatMessage> { chatHistory[0] }; // Keep the initial assistant statement
+
+            foreach (var message in chatHistory.Skip(1).Reverse())
+            {
+                var messageTokens = message.Content.Split(' ').Length;
+
+                if (totalTokens + messageTokens <= tokensToKeep)
+                {
+                    truncatedHistory.Insert(1, message);
+                    totalTokens += messageTokens;
+                }
+                else
+                {
+                    break;
+                }
+            }
+
+            return truncatedHistory;
+        }
     }
 }

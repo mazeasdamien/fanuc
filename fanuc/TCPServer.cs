@@ -4,6 +4,8 @@ using System.Collections.Concurrent;
 using System.Net.Sockets;
 using System.Net;
 using System.Text;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace FanucRobotServer
 {
@@ -26,7 +28,6 @@ namespace FanucRobotServer
 
         // Add this field to keep track of the chat history
         private List<ChatMessage> chatHistory = new List<ChatMessage>();
-        private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
 
         public TCPServer(int port)
         {
@@ -41,7 +42,8 @@ namespace FanucRobotServer
             try
             {
                 _real_robot = new FRCRobot();
-                _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
+                _real_robot.ConnectEx("127.0.0.1", false, 10, 1);
+                //_real_robot.ConnectEx("192.168.1.20", false, 10, 1);
                 Console.WriteLine("Connected to real robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
                 FRCTasks mobjTasksREAL = _real_robot.Tasks;
@@ -87,14 +89,27 @@ namespace FanucRobotServer
             Directory.CreateDirectory(jsonDirectory);
 
             //set the OpenAI Assistant
-            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content =
-                "You are robot path planning assistant. " +
-                "Given the following coordinate limitation: " +
-                "X limits are from -0.69 to -1.35 " +
-                "Y limits equal to 1.2 " +
-                "Z limits are from -1 to 0.17 " +
-                "Reply me with a JSON file containing the path positions list X Y Z values in meters inside the limitation provided, don't use limitation as positions values" +
-                "Only output the JSON content without comments in it. It's very important "
+            chatHistory.Add(new ChatMessage
+            {
+                Role = ChatMessageRole.Assistant,
+                Content =
+                    "Welcome to the Robot Path Planning Assistant!\n\n" +
+                    "I'm here to help you generate a JSON file for your desired robot path. " +
+                    "Please provide a detailed description of the path you have in mind " +
+                    " I will make sure the generated coordinate are constrained in the following coordinate limitations:\n" +
+                    "- X limits: -0.69 to -1.35\n" +
+                    "- Y limits: 1.0 to 1.5\n" +
+                    "- Z limits: -1 to 0.17\n\n" +
+                    "Reply will be a JSON file containing the path positions as a list of X, Y, Z values in meters, adhering to the provided limitations. " +
+                    "For example, the JSON format should be:\n" +
+                    "{\n" +
+                    "  \"positions\": [\n" +
+                    "    {\"X\": -1.05, \"Y\": -1.34, \"Z\": -0.5},\n" +
+                    "    {\"X\": -1.20, \"Y\": -1.47, \"Z\": -0.17}\n" +
+                    "  ]\n" +
+                    "}\n\n" +
+                    "The JSON content doesn't include any comments. This is important for proper processing. " +
+                    "Provide as much detail as possible, and I'll assist you in generating the JSON file for your robot path."
             });
 
             _server.Start();
@@ -322,34 +337,26 @@ namespace FanucRobotServer
                             unity_cmd = values[0];
                             Console.WriteLine("Unity prompt message received: " + unity_cmd);
 
-                            try
+                            // This will start the execution of the long-running operation asynchronously, on another thread
+                            Task.Run(async () =>
                             {
-                                // This will start the execution of the long-running operation asynchronously, on another thread
-                                Task.Run(async () =>
-                                {
-                                    // Add user messages to the list
-                                    chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = unity_cmd });
+                                // Add user messages to the list
+                                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = unity_cmd });
 
-                                    Console.ForegroundColor = ConsoleColor.Yellow;
-                                    Console.WriteLine("The prompt is sent to GPT, waiting response... ");
-                                    Console.ResetColor();
+                                Console.ForegroundColor = ConsoleColor.Yellow;
+                                Console.WriteLine("The prompt is sent to GPT, waiting response... ");
+                                Console.ResetColor();
 
-                                    // Pass the list of ChatMessage to GetResponseFromGPT
-                                    string response = await GPT.GetResponseFromGPT(openai_api_key, chatHistory, "gpt-3.5-turbo");
+                                // Pass the list of ChatMessage to GetResponseFromGPT
+                                string response = await GPT.GetResponseFromGPT(openai_api_key, chatHistory, "gpt-3.5-turbo");
 
-                                    // Save the JSON file to the specified path
-                                    GPT.SaveResult(jsonPath, response);
-                                    Console.ForegroundColor = ConsoleColor.Green;
-                                    Console.WriteLine("Successfully updated the trajectory JSON file at: " + jsonPath);
-                                    Console.ResetColor();
-                                });
-                            }
-                            finally
-                            {
-                                _semaphore.Release();
-                            }
+                                // Save the JSON file to the specified path
+                                GPT.SaveResult(jsonPath, response);
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine("Successfully updated the trajectory JSON file at: " + jsonPath);
+                                Console.ResetColor();
+                            });
                         }
-
                     }
                 }
             }
