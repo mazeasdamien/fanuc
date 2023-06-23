@@ -112,10 +112,8 @@ namespace FanucRobotServer
         /// <param name="prompt"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentNullException"></exception>
-        public static async Task<string> GetResponseFromGPT(string key, string prompt, string modelId)
+        public static async Task<string> GetResponseFromGPT(string key, List<ChatMessage> chatHistory, string modelId)
         {
-            if (string.IsNullOrEmpty(prompt)) { throw new ArgumentNullException(nameof(prompt)); }
-
             try
             {
                 var openai = new OpenAIAPI(new APIAuthentication(key));
@@ -123,13 +121,14 @@ namespace FanucRobotServer
                 var request = new ChatRequest()
                 {
                     Model = modelId,
-                    Messages = new ChatMessage[] {
-                new ChatMessage(ChatMessageRole.User, prompt)
-            }
+                    Messages = chatHistory.ToArray()
                 };
 
                 var result = await openai.Chat.CreateChatCompletionAsync(request);
                 var reply = result.Choices[0].Message;
+
+                // Add the reply to the chat history
+                chatHistory.Add(reply);
 
                 return $"{reply.Role}: {reply.Content.Trim()}";
             }

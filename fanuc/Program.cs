@@ -116,7 +116,9 @@ namespace FanucRobotServer
             // Add the connected client to the clients dictionary
             _clients.TryAdd(client, 0);
 
+#pragma warning disable CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
             ThreadPool.QueueUserWorkItem(HandleClientComm, client);
+#pragma warning restore CS8622 // Nullability of reference types in type of parameter doesn't match the target delegate (possibly because of nullability attributes).
 
             WaitForClientConnect();
         }
