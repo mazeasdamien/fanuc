@@ -14,15 +14,10 @@ namespace FanucRobotServer
             TCPServer server = new TCPServer(port);
             GPT gpt = new GPT();
 
-            server.Start();
-            Console.WriteLine("CTRL + C to stop the server...");
-            Console.ReadLine();
-            server.Stop();
-
-            string key_path = "C:\\Users\\OpEx - Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\json\\openai_api_key.json";
+            string key_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\json\\openai_api_key.json";
             string openai_api_key = gpt.LoadOpenAIKey(key_path);
 
-            string prompt_path = "C:\\Users\\OpEx-Dev\\Documents\\Haoxuan_workspace\\C#\\chatbot\\OpenAI\\OpenAITesting\\OpenAITesting\\prompt\\prompt_template.txt";
+            string prompt_path = "C:\\Users\\s345471\\Source\\Repos\\fanuc\\fanuc\\txt\\prompt_template.txt";
             string prompt_template = gpt.LoadPromptTemplate(prompt_path);
 
             string prompt = gpt.ConstructPrompt(prompt_template, server.unity_cmd);
@@ -35,6 +30,11 @@ namespace FanucRobotServer
             Console.WriteLine("Saving the result to the file...");
             gpt.SaveResult(json_path, response);
             Console.WriteLine("Successfully updated the trajectory json file.");
+
+            server.Start();
+            Console.WriteLine("CTRL + C to stop the server...");
+            Console.ReadLine();
+            server.Stop();
         }
     }
 
