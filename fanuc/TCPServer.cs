@@ -6,6 +6,7 @@ using System.Net;
 using System.Text;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
+using System.Numerics;
 
 namespace FanucRobotServer
 {
@@ -25,6 +26,12 @@ namespace FanucRobotServer
         string jsonFileName = "RobotData.json";
         string jsonDirectory = Path.Combine(Path.GetTempPath(), "RobotData"); // Create a subdirectory in the temp directory
         string jsonPath;
+
+        public Vector3 cameraPosition;
+        public Vector3 boundingBox_center;
+        public Vector3 boundingBox_point1;
+        public Vector3 boundingBox_point2;
+        public float distanceCameraSurface;
 
         // Add this field to keep track of the chat history
         private List<ChatMessage> chatHistory = new List<ChatMessage>();
@@ -87,30 +94,7 @@ namespace FanucRobotServer
             jsonPath = Path.Combine(jsonDirectory, jsonFileName);
             // Ensure the directory exists, and create it if it doesn't
             Directory.CreateDirectory(jsonDirectory);
-
-            //set the OpenAI Assistant
-            chatHistory.Add(new ChatMessage
-            {
-                Role = ChatMessageRole.Assistant,
-                Content =
-                    "Welcome to the Robot Path Planning Assistant!\n\n" +
-                    "I'm here to help you generate a JSON file for your desired robot path. " +
-                    "Please provide a detailed description of the path you have in mind " +
-                    " I will make sure the generated coordinate are constrained in the following coordinate limitations:\n" +
-                    "- X limits: -0.69 to -1.35\n" +
-                    "- Y limits: 1.0 to 1.5\n" +
-                    "- Z limits: -1 to 0.17\n\n" +
-                    "Reply will be a JSON file containing the path positions as a list of X, Y, Z values in meters, adhering to the provided limitations. " +
-                    "For example, the JSON format should be:\n" +
-                    "{\n" +
-                    "  \"positions\": [\n" +
-                    "    {\"X\": -1.05, \"Y\": -1.34, \"Z\": -0.5},\n" +
-                    "    {\"X\": -1.20, \"Y\": -1.47, \"Z\": -0.17}\n" +
-                    "  ]\n" +
-                    "}\n\n" +
-                    "The JSON content doesn't include any comments. This is important for proper processing. " +
-                    "Provide as much detail as possible, and I'll assist you in generating the JSON file for your robot path."
-            });
+            //Console.WriteLine(jsonDirectory);
 
             _server.Start();
             Console.WriteLine("Server started on " + _localAddr + ":" + _port);
@@ -264,6 +248,22 @@ namespace FanucRobotServer
                                 isReachable = false;
                             }
                         }
+                        else if (values.Length == 13)
+                        {
+                            cameraPosition.X = float.Parse(values[0]);
+                            cameraPosition.Y = float.Parse(values[1]);
+                            cameraPosition.Z = float.Parse(values[2]);
+                            boundingBox_point1.X = float.Parse(values[3]);
+                            boundingBox_point1.Y = float.Parse(values[4]);
+                            boundingBox_point1.Z = float.Parse(values[5]);
+                            boundingBox_point2.X = float.Parse(values[6]);
+                            boundingBox_point2.Y = float.Parse(values[7]);
+                            boundingBox_point2.Z = float.Parse(values[8]);
+                            boundingBox_center.X = float.Parse(values[9]);
+                            boundingBox_center.Y = float.Parse(values[10]);
+                            boundingBox_center.Z = float.Parse(values[11]);
+                            distanceCameraSurface = float.Parse(values[12]);
+                        }
                         else if (receivedData.Trim() == "run")
                         {
                             Console.WriteLine("Run command received");
@@ -340,8 +340,21 @@ namespace FanucRobotServer
                             // This will start the execution of the long-running operation asynchronously, on another thread
                             Task.Run(async () =>
                             {
+                                string message =
+                                "This chat is a path planning assitant for an industrial robot equiped with inspection RGBD camera, bellow are the specifation for the path generation\n" +
+                                "Create a JSON file list named positions and each position is X Y Z in meters with the following limitations:\n" +
+                               $"X limits: {boundingBox_point1.X} to {boundingBox_point2.X}\n" +
+                               $"Y limits: {boundingBox_point1.Y} to {boundingBox_point2.Y}\n" +
+                               $"Z limits: {boundingBox_point1.Z} to {boundingBox_point2.Z}\n" +
+                               $"The center coordinate of the operating area is X: {boundingBox_center.X} Y: {boundingBox_center.Y} Z: {boundingBox_center.Z}\n" +
+                               $"The camera location is currently: X: {cameraPosition.X} Y: {cameraPosition.Y} Z: {cameraPosition.Z}\n" +
+                               $"The distance depth recorded from the RGBD camera to the surface is : {distanceCameraSurface} cm\n" +
+                               "Here is the JSON template:" +
+                               "{\r\n    \"positions\": [\r\n        {\r\n            \"X\": -1.1075,\r\n            \"Y\": 1.035,\r\n            \"Z\": -0.5\r\n        },\r\n        {\r\n            \"X\": -1.1075,\r\n            \"Y\": 1.15,\r\n            \"Z\": 0.2\r\n        }\r\n    ]\r\n} " +
+                               unity_cmd;
+
                                 // Add user messages to the list
-                                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = unity_cmd });
+                                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = message });
 
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.WriteLine("The prompt is sent to GPT, waiting response... ");

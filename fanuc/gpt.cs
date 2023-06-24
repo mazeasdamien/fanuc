@@ -20,9 +20,7 @@ namespace FanucRobotServer
             {
                 var openai = new OpenAIAPI(new APIAuthentication(key));
 
-                // Exclude the first message (initial assistant statement) from truncation
-                var messagesToTruncate = chatHistory.Skip(1).ToList();
-                var truncatedMessages = TruncateChatHistory(messagesToTruncate);
+                var truncatedMessages = TruncateChatHistory(chatHistory);
 
                 var request = new ChatRequest()
                 {
@@ -34,7 +32,7 @@ namespace FanucRobotServer
                 var reply = result.Choices[0].Message.Content;
 
                 // Add the reply to the chat history
-                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.System, Content = reply });
+                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = reply });
 
                 return $"{reply.Trim()}";
             }
@@ -79,38 +77,26 @@ namespace FanucRobotServer
             }
         }
 
-        private static List<ChatMessage> TruncateChatHistory(List<ChatMessage> chatHistory)
+        public static List<ChatMessage> TruncateChatHistory(List<ChatMessage> chatHistory)
         {
-            const int MaxChatTokens = 4096;
-            const int TokenBuffer = 32;
+            int totalTokens = chatHistory.Sum(m => m.Content.Split(' ').Length);  // Roughly estimate tokens as words
 
-            var totalTokens = chatHistory.Sum(msg => msg.Content.Split(' ').Length);
-            var tokensToKeep = MaxChatTokens - TokenBuffer;
-
-            if (totalTokens <= tokensToKeep)
+            // This checks if the chat history exceeds the maximum limit
+            if (totalTokens <= 4096 + 32)
             {
-                // No truncation required
                 return chatHistory;
             }
 
-            var truncatedHistory = new List<ChatMessage> { chatHistory[0] }; // Keep the initial assistant statement
-
-            foreach (var message in chatHistory.Skip(1).Reverse())
+            // Remove older messages until the total number of tokens fits within the limit
+            while (totalTokens > 4096)
             {
-                var messageTokens = message.Content.Split(' ').Length;
-
-                if (totalTokens + messageTokens <= tokensToKeep)
-                {
-                    truncatedHistory.Insert(1, message);
-                    totalTokens += messageTokens;
-                }
-                else
-                {
-                    break;
-                }
+                var messageToRemove = chatHistory[0];
+                totalTokens -= messageToRemove.Content.Split(' ').Length;  // Roughly estimate tokens as words
+                chatHistory.RemoveAt(0);
             }
 
-            return truncatedHistory;
+            return chatHistory;
         }
+
     }
 }
