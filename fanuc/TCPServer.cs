@@ -44,6 +44,8 @@ namespace FanucRobotServer
             ConnectToRobot();
         }
 
+
+
         public void ConnectToRobot()
         {
             try
