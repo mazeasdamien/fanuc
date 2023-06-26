@@ -98,12 +98,13 @@ namespace FanucRobotServer
             string Assistant1 =
                 "This chat is a path planning assitant for an industrial robot equiped with inspection RGBD camera, bellow are the specifation for the path generation\n" +
                 "Create a JSON file list named positions and each position is X Y Z in meters with the following limitations:\n" +
-                $"X limits: {boundingBox_point1.X} to {boundingBox_point2.X}\n" +
-                $"Y limits: {boundingBox_point1.Y} to {boundingBox_point2.Y}\n" +
-                $"Z limits: {boundingBox_point1.Z} to {boundingBox_point2.Z}\n" +
-                $"The center coordinate of the operating area is X: {boundingBox_center.X} Y: {boundingBox_center.Y} Z: {boundingBox_center.Z}\n" +
-                $"The camera location is currently: X: {cameraPosition.X} Y: {cameraPosition.Y} Z: {cameraPosition.Z}\n" +
-                $"The distance depth recorded from the RGBD camera to the surface is : {distanceCameraSurface} cm\n";
+                "X limits: [boundingBox_point1.X] to [boundingBox_point2.X]\n" +
+                "Y limits: [boundingBox_point1.Y] to [boundingBox_point2.Y]\n" +
+                "Z limits: [boundingBox_point1.Z] to [boundingBox_point2.Z]\n" +
+                "The center coordinate of the operating area is X: [boundingBox_center.X] Y: [boundingBox_center.Y] Z: [boundingBox_center.Z]\n" +
+                "The camera location is currently: X: [cameraPosition.X] Y: [cameraPosition.Y] Z: [cameraPosition.Z]\n" +
+                "The distance depth recorded from the RGBD camera to the surface is : [distanceCameraSurface] cm\n" +
+                "All the value in [ ] will be updated by the user";
             chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant1 });
 
             string user1 = "create a perfect circle in the limitations";
@@ -362,12 +363,27 @@ namespace FanucRobotServer
                             // This will start the execution of the long-running operation asynchronously, on another thread
                             Task.Run(async () =>
                             {
+                                string updateValues = $"[boundingBox_point1.X] = {boundingBox_point1.X} m\n" +
+                                $"[boundingBox_point2.X] = {boundingBox_point2.X} m\n" +
+                                $"[boundingBox_point1.Y] = {boundingBox_point1.Y} m\n" +
+                                $"[boundingBox_point2.Y] = {boundingBox_point2.Y} m\n" +
+                                $"[boundingBox_point1.Z] = {boundingBox_point1.Z} m\n" +
+                                $"[boundingBox_point2.Z] = {boundingBox_point2.Z} m\n" +
+                                $"[boundingBox_center.X] = {boundingBox_center.X} m\n" +
+                                $"[boundingBox_center.Y] = {boundingBox_center.Y} m\n" +
+                                $"[boundingBox_center.Z] = {boundingBox_center.Z} m\n" +
+                                $"[cameraPosition.X] = {cameraPosition.X} m\n" +
+                                $"[cameraPosition.Y] = {cameraPosition.Y} m\n" +
+                                $"[cameraPosition.Z] = {cameraPosition.Z} m\n" +
+                                $"[distanceCameraSurface] = {distanceCameraSurface} cm\n";
 
                                 string message = unity_cmd;
-                                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = message });
+                                chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = updateValues + message });
 
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.WriteLine("The prompt is sent to GPT, waiting response... ");
+                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.WriteLine(updateValues + message);
                                 Console.ResetColor();
 
                                 // Pass the list of ChatMessage to GetResponseFromGPT
