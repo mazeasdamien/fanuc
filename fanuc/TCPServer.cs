@@ -51,7 +51,6 @@ namespace FanucRobotServer
             try
             {
                 _real_robot = new FRCRobot();
-                //_real_robot.ConnectEx("127.0.0.1", false, 10, 1);
                 _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
                 Console.WriteLine("Connected to real robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
@@ -93,10 +92,31 @@ namespace FanucRobotServer
 
         public void Start()
         {
-            jsonPath = Path.Combine(jsonDirectory, jsonFileName);
-            // Ensure the directory exists, and create it if it doesn't
             Directory.CreateDirectory(jsonDirectory);
-            //Console.WriteLine(jsonDirectory);
+            jsonPath = Path.Combine(jsonDirectory, jsonFileName);
+
+            string Assistant1 =
+                "This chat is a path planning assitant for an industrial robot equiped with inspection RGBD camera, bellow are the specifation for the path generation\n" +
+                "Create a JSON file list named positions and each position is X Y Z in meters with the following limitations:\n" +
+                $"X limits: {boundingBox_point1.X} to {boundingBox_point2.X}\n" +
+                $"Y limits: {boundingBox_point1.Y} to {boundingBox_point2.Y}\n" +
+                $"Z limits: {boundingBox_point1.Z} to {boundingBox_point2.Z}\n" +
+                $"The center coordinate of the operating area is X: {boundingBox_center.X} Y: {boundingBox_center.Y} Z: {boundingBox_center.Z}\n" +
+                $"The camera location is currently: X: {cameraPosition.X} Y: {cameraPosition.Y} Z: {cameraPosition.Z}\n" +
+                $"The distance depth recorded from the RGBD camera to the surface is : {distanceCameraSurface} cm\n";
+            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant1 });
+
+            string user1 = "create a perfect circle in the limitations";
+            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = user1 });
+
+            string Assistant2 = "{\r\n    \"positions\": [\r\n        {\r\n            \"X\": -1.0555,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.416\r\n        },\r\n        {\r\n            \"X\": -1.0158,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.4773\r\n        },\r\n        {\r\n            \"X\": -0.9964,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.549\r\n        },\r\n        {\r\n            \"X\": -1.0057,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.6232\r\n        },\r\n        {\r\n            \"X\": -1.0444,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.6872\r\n        },\r\n        {\r\n            \"X\": -1.1055,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.7326\r\n        },\r\n        {\r\n            \"X\": -1.1755,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.7523\r\n        },\r\n        {\r\n            \"X\": -1.2462,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.7429\r\n        },\r\n        {\r\n            \"X\": -1.3065,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.7057\r\n        },\r\n        {\r\n            \"X\": -1.3462,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.6458\r\n        },\r\n        {\r\n            \"X\": -1.3598,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.5716\r\n        },\r\n        {\r\n            \"X\": -1.3458,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.4964\r\n        },\r\n        {\r\n            \"X\": -1.3071,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.4324\r\n        },\r\n        {\r\n            \"X\": -1.246,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.387\r\n        },\r\n        {\r\n            \"X\": -1.1755,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.3673\r\n        },\r\n        {\r\n            \"X\": -1.1055,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.3767\r\n        },\r\n        {\r\n            \"X\": -1.0555,\r\n            \"Y\": 1.3205,\r\n            \"Z\": -0.416\r\n        }\r\n    ]\r\n}\r\n";
+            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant2 });
+
+            string user2 = "create a perfect sqaure in the limitations";
+            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = user2 });
+
+            string Assistant3 = "{\r\n    \"positions\": [\r\n        {\r\n            \"X\": -0.8,\r\n            \"Y\": 1.185,\r\n            \"Z\": -0.5\r\n        },\r\n        {\r\n            \"X\": -1.2,\r\n            \"Y\": 1.25,\r\n            \"Z\": 0.2\r\n        },\r\n        {\r\n            \"X\": -1.35,\r\n            \"Y\": 1.35,\r\n            \"Z\": 0.4\r\n        },\r\n        {\r\n            \"X\": -1.4,\r\n            \"Y\": 1.45,\r\n            \"Z\": 0.6\r\n        },\r\n        {\r\n            \"X\": -1.45,\r\n            \"Y\": 1.543001,\r\n            \"Z\": 0.8\r\n        }\r\n    ]\r\n}\r\n";
+            chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant3 });
 
             _server.Start();
             Console.WriteLine("Server started on " + _localAddr + ":" + _port);
@@ -342,20 +362,8 @@ namespace FanucRobotServer
                             // This will start the execution of the long-running operation asynchronously, on another thread
                             Task.Run(async () =>
                             {
-                                string message =
-                                "This chat is a path planning assitant for an industrial robot equiped with inspection RGBD camera, bellow are the specifation for the path generation\n" +
-                                "Create a JSON file list named positions and each position is X Y Z in meters with the following limitations:\n" +
-                               $"X limits: {boundingBox_point1.X} to {boundingBox_point2.X}\n" +
-                               $"Y limits: {boundingBox_point1.Y} to {boundingBox_point2.Y}\n" +
-                               $"Z limits: {boundingBox_point1.Z} to {boundingBox_point2.Z}\n" +
-                               $"The center coordinate of the operating area is X: {boundingBox_center.X} Y: {boundingBox_center.Y} Z: {boundingBox_center.Z}\n" +
-                               $"The camera location is currently: X: {cameraPosition.X} Y: {cameraPosition.Y} Z: {cameraPosition.Z}\n" +
-                               $"The distance depth recorded from the RGBD camera to the surface is : {distanceCameraSurface} cm\n" +
-                               "Here is the JSON template:" +
-                               "{\r\n    \"positions\": [\r\n        {\r\n            \"X\": -1.1075,\r\n            \"Y\": 1.035,\r\n            \"Z\": -0.5\r\n        },\r\n        {\r\n            \"X\": -1.1075,\r\n            \"Y\": 1.15,\r\n            \"Z\": 0.2\r\n        }\r\n    ]\r\n} " +
-                               unity_cmd;
 
-                                // Add user messages to the list
+                                string message = unity_cmd;
                                 chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = message });
 
                                 Console.ForegroundColor = ConsoleColor.Yellow;
