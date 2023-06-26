@@ -35,6 +35,7 @@ namespace FanucRobotServer
 
         // Add this field to keep track of the chat history
         private List<ChatMessage> chatHistory = new List<ChatMessage>();
+        private string[] values;
 
         public TCPServer(int port)
         {
@@ -106,7 +107,7 @@ namespace FanucRobotServer
                 "The distance depth recorded from the RGBD camera to the surface is : [distanceCameraSurface] cm\n" +
                 "All the value in [ ] will be updated by the user";
             chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant1 });
-
+            /*
             string user1 = "create a perfect circle in the limitations";
             chatHistory.Add(new ChatMessage { Role = ChatMessageRole.User, Content = user1 });
 
@@ -118,11 +119,11 @@ namespace FanucRobotServer
 
             string Assistant3 = "{\r\n    \"positions\": [\r\n        {\r\n            \"X\": -0.8,\r\n            \"Y\": 1.185,\r\n            \"Z\": -0.5\r\n        },\r\n        {\r\n            \"X\": -1.2,\r\n            \"Y\": 1.25,\r\n            \"Z\": 0.2\r\n        },\r\n        {\r\n            \"X\": -1.35,\r\n            \"Y\": 1.35,\r\n            \"Z\": 0.4\r\n        },\r\n        {\r\n            \"X\": -1.4,\r\n            \"Y\": 1.45,\r\n            \"Z\": 0.6\r\n        },\r\n        {\r\n            \"X\": -1.45,\r\n            \"Y\": 1.543001,\r\n            \"Z\": 0.8\r\n        }\r\n    ]\r\n}\r\n";
             chatHistory.Add(new ChatMessage { Role = ChatMessageRole.Assistant, Content = Assistant3 });
-
+            */
             _server.Start();
             Console.WriteLine("Server started on " + _localAddr + ":" + _port);
             WaitForClientConnect();
-
+            
             // Continuously send data to clients in a separate task
             Task.Run(async () => await SendDataToClientContinuously(_cts.Token));
         }
@@ -243,7 +244,7 @@ namespace FanucRobotServer
                     if (bytesRead > 0)
                     {
                         string receivedData = Encoding.ASCII.GetString(buffer, 0, bytesRead);
-                        string[] values = receivedData.Split(',');
+                        values = receivedData.Split(',');
                         //Console.WriteLine("Data received from client: " + receivedData);
 
                         if (values.Length == 6)
@@ -270,22 +271,6 @@ namespace FanucRobotServer
                             {
                                 isReachable = false;
                             }
-                        }
-                        else if (values.Length == 13)
-                        {
-                            cameraPosition.X = float.Parse(values[0]);
-                            cameraPosition.Y = float.Parse(values[1]);
-                            cameraPosition.Z = float.Parse(values[2]);
-                            boundingBox_point1.X = float.Parse(values[3]);
-                            boundingBox_point1.Y = float.Parse(values[4]);
-                            boundingBox_point1.Z = float.Parse(values[5]);
-                            boundingBox_point2.X = float.Parse(values[6]);
-                            boundingBox_point2.Y = float.Parse(values[7]);
-                            boundingBox_point2.Z = float.Parse(values[8]);
-                            boundingBox_center.X = float.Parse(values[9]);
-                            boundingBox_center.Y = float.Parse(values[10]);
-                            boundingBox_center.Z = float.Parse(values[11]);
-                            distanceCameraSurface = float.Parse(values[12]);
                         }
                         else if (receivedData.Trim() == "run")
                         {
@@ -355,9 +340,23 @@ namespace FanucRobotServer
                             Thread.Sleep(500);
 
                         }
-                        else if (values.Length == 1) // PRONPT MUST BE WITHOUT COMMA 
+                        else if (values.Length == 14) // PRONPT MUST BE WITHOUT COMMA 
                         {
-                            unity_cmd = values[0];
+                            cameraPosition.X = float.Parse(values[0]);
+                            cameraPosition.Y = float.Parse(values[1]);
+                            cameraPosition.Z = float.Parse(values[2]);
+                            boundingBox_point1.X = float.Parse(values[3]);
+                            boundingBox_point1.Y = float.Parse(values[4]);
+                            boundingBox_point1.Z = float.Parse(values[5]);
+                            boundingBox_point2.X = float.Parse(values[6]);
+                            boundingBox_point2.Y = float.Parse(values[7]);
+                            boundingBox_point2.Z = float.Parse(values[8]);
+                            boundingBox_center.X = float.Parse(values[9]);
+                            boundingBox_center.Y = float.Parse(values[10]);
+                            boundingBox_center.Z = float.Parse(values[11]);
+                            distanceCameraSurface = float.Parse(values[12]);
+                            unity_cmd = values[13];
+
                             Console.WriteLine("Unity prompt message received: " + unity_cmd);
 
                             // This will start the execution of the long-running operation asynchronously, on another thread
@@ -382,7 +381,7 @@ namespace FanucRobotServer
 
                                 Console.ForegroundColor = ConsoleColor.Yellow;
                                 Console.WriteLine("The prompt is sent to GPT, waiting response... ");
-                                Console.ForegroundColor = ConsoleColor.Green;
+                                Console.ForegroundColor = ConsoleColor.Gray;
                                 Console.WriteLine(updateValues + message);
                                 Console.ResetColor();
 
@@ -405,7 +404,7 @@ namespace FanucRobotServer
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error in HandleClientComm: " + ex.Message);
+                Console.WriteLine("Error in HandleClientComm: " + ex.Message + values);
             }
             finally
             {
