@@ -1,12 +1,8 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using FRRobot;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace FanucRobotServer
 {
@@ -21,7 +17,6 @@ namespace FanucRobotServer
         private FRCJoint _prevJoint;
         private FRCXyzWpr _prevXyzWpr;
         private FRCIOTypes IOTypes;
-        private bool isReachable = true;
 
         public TCPServer(int port)
         {
@@ -50,7 +45,6 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                //my expe
                 xyzWpr.X = 630;
                 xyzWpr.Y = -70;
                 xyzWpr.Z = 835.273;
@@ -58,15 +52,6 @@ namespace FanucRobotServer
                 xyzWpr.P = 62.596;
                 xyzWpr.R = -180;
 
-                //chatGPT
-                /*
-                xyzWpr.X = 1200;
-                xyzWpr.Y = 50;
-                xyzWpr.Z = 900;
-                xyzWpr.W = 0;
-                xyzWpr.P = 0;
-                xyzWpr.R = 90;
-                */
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
                 Thread.Sleep(500);
@@ -132,8 +117,6 @@ namespace FanucRobotServer
 
         private async Task SendDataToClientContinuously(CancellationToken cancellationToken)
         {
-            string previousMessage = null;
-
             while (!cancellationToken.IsCancellationRequested)
             {
                 var curPosition = _real_robot.CurPosition;
@@ -145,20 +128,9 @@ namespace FanucRobotServer
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
                 string message = $"{joint[1]:F1},{joint[2]:F1},{joint[3]:F1},{joint[4]:F1},{joint[5]:F1},{joint[6]:F1},{xyzWpr.X:F1},{xyzWpr.Y:F1},{xyzWpr.Z:F1},{xyzWpr.W:F1},{xyzWpr.P:F1},{xyzWpr.R:F1}";
+                SendDataToClient(message + "\n");
 
-                    string messageReachability = $"{isReachable}";
-                    SendDataToClient(messageReachability + "\n");
-
-
-                if (previousMessage == null || previousMessage != message)
-                {
-                    Console.WriteLine(message);
-                    SendDataToClient(message + "\n");
-                    previousMessage = message;
-                }
-
-                // Adjust the delay as needed to control the frequency of updates
-                await Task.Delay(0, cancellationToken);
+                await Task.Delay(80, cancellationToken);
             }
         }
 
@@ -233,12 +205,14 @@ namespace FanucRobotServer
 
                             if (sysGroupPosition.IsReachable[Type.Missing, FREMotionTypeConstants.frJointMotionType, FREOrientTypeConstants.frAESWorldOrientType, Type.Missing, out _])
                             {
-                                isReachable = true;
                                 sysGroupPosition.Update();
+                                SendDataToClient("true" + "\n");
+                                //Console.WriteLine("true");
                             }
                             else
                             {
-                                isReachable = false;
+                                SendDataToClient("false" + "\n");
+                                //Console.WriteLine("false");
                             }
                         }
                         else if (receivedData.Trim() == "run")
@@ -304,15 +278,6 @@ namespace FanucRobotServer
                             xyzWpr.P = 62.596;
                             xyzWpr.R = -180;
 
-                            //chatGPT
-                            /*
-                            xyzWpr.X = 1200;
-                            xyzWpr.Y = 50;
-                            xyzWpr.Z = 900;
-                            xyzWpr.W = 0;
-                            xyzWpr.P = 0;
-                            xyzWpr.R = 90;
-                            */
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
                             Thread.Sleep(500);
