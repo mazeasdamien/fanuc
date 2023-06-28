@@ -117,6 +117,7 @@ namespace FanucRobotServer
 
         private async Task SendDataToClientContinuously(CancellationToken cancellationToken)
         {
+            string previousMessage = null;
             while (!cancellationToken.IsCancellationRequested)
             {
                 var curPosition = _real_robot.CurPosition;
@@ -128,8 +129,15 @@ namespace FanucRobotServer
                 var xyzWpr = (FRCXyzWpr)groupPositionWorld.Formats[FRETypeCodeConstants.frXyzWpr];
 
                 string message = $"{joint[1]:F1},{joint[2]:F1},{joint[3]:F1},{joint[4]:F1},{joint[5]:F1},{joint[6]:F1},{xyzWpr.X:F1},{xyzWpr.Y:F1},{xyzWpr.Z:F1},{xyzWpr.W:F1},{xyzWpr.P:F1},{xyzWpr.R:F1}";
-                SendDataToClient(message + "\n");
 
+
+                if (previousMessage == null || previousMessage != message)
+                {
+                    SendDataToClient(message + "\n");
+                    previousMessage = message;
+                }
+
+                // Adjust the delay as needed to control the frequency of updates
                 await Task.Delay(80, cancellationToken);
             }
         }
@@ -207,12 +215,10 @@ namespace FanucRobotServer
                             {
                                 sysGroupPosition.Update();
                                 SendDataToClient("true" + "\n");
-                                //Console.WriteLine("true");
                             }
                             else
                             {
                                 SendDataToClient("false" + "\n");
-                                //Console.WriteLine("false");
                             }
                         }
                         else if (receivedData.Trim() == "run")
