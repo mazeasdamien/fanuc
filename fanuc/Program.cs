@@ -32,7 +32,6 @@ namespace FanucRobotServer
             {
                 _real_robot = new FRCRobot();
                 _real_robot.ConnectEx("192.168.1.20", false, 10, 1);
-                //_real_robot.ConnectEx("127.0.0.1", false, 10, 1);
                 Console.WriteLine("Connected to real robot successfully.");
                 FRCAlarms fRCAlarmsREAL = _real_robot.Alarms;
                 FRCTasks mobjTasksREAL = _real_robot.Tasks;
@@ -45,12 +44,12 @@ namespace FanucRobotServer
                 FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                 FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                xyzWpr.X = 630;
-                xyzWpr.Y = -70;
-                xyzWpr.Z = 835.273;
-                xyzWpr.W = 0;
-                xyzWpr.P = 62.596;
-                xyzWpr.R = -180;
+                xyzWpr.X = 558;
+                xyzWpr.Y = 317.001;
+                xyzWpr.Z = 980.365;
+                xyzWpr.W = 2.758;
+                xyzWpr.P = 58.214;
+                xyzWpr.R = 155.732;
 
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
@@ -235,12 +234,12 @@ namespace FanucRobotServer
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
 
-                            xyzWpr.X = 630;
-                            xyzWpr.Y = -70;
-                            xyzWpr.Z = 835.273;
-                            xyzWpr.W = 0;
-                            xyzWpr.P = 62.596;
-                            xyzWpr.R = -180;
+                            xyzWpr.X = 558;
+                            xyzWpr.Y = 317.001;
+                            xyzWpr.Z = 980.365;
+                            xyzWpr.W = 2.758;
+                            xyzWpr.P = 58.214;
+                            xyzWpr.R = 155.732;
 
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
@@ -276,13 +275,13 @@ namespace FanucRobotServer
                             FRCSysPosition sysPosition = fRCTPPositions[3];
                             FRCSysGroupPosition sysGroupPosition = sysPosition.Group[1];
                             FRCXyzWpr xyzWpr = sysGroupPosition.Formats[FRETypeCodeConstants.frXyzWpr];
-                            
-                            xyzWpr.X = 630;
-                            xyzWpr.Y = -70;
-                            xyzWpr.Z = 835.273;
-                            xyzWpr.W = 0;
-                            xyzWpr.P = 62.596;
-                            xyzWpr.R = -180;
+
+                            xyzWpr.X = 558;
+                            xyzWpr.Y = 317.001;
+                            xyzWpr.Z = 980.365;
+                            xyzWpr.W = 2.758;
+                            xyzWpr.P = 58.214;
+                            xyzWpr.R = 155.732;
 
                             Thread.Sleep(500);
                             sysGroupPosition.Update();
@@ -296,7 +295,7 @@ namespace FanucRobotServer
             {
                 Console.WriteLine("Client disconnected: " + ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception ex) 
             {
                 Console.WriteLine("Error in HandleClientComm: " + ex.Message);
             }
