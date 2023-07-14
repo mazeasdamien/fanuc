@@ -54,7 +54,7 @@ namespace FanucRobotServer
                 Thread.Sleep(500);
                 sysGroupPosition.Update();
                 Thread.Sleep(500);
-                
+
                 Thread.Sleep(500);
                 mobjTasksREAL.AbortAll();
                 Thread.Sleep(500);
@@ -289,13 +289,13 @@ namespace FanucRobotServer
 
                         }
                     }
-                 }
+                }
             }
             catch (IOException ex)
             {
                 Console.WriteLine("Client disconnected: " + ex.Message);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 Console.WriteLine("Error in HandleClientComm: " + ex.Message);
             }
@@ -319,4 +319,4 @@ namespace FanucRobotServer
             server.Stop();
         }
     }
-}
+} 
