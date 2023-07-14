@@ -1,4 +1,5 @@
 ﻿using Microsoft.Extensions.Configuration;
+using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace fanuc
@@ -31,7 +32,7 @@ namespace fanuc
             // If exists, then read the file and load the config.json
             Console.WriteLine("Configuration file is found for loading.");
 
-            return ReadConfigFile();
+            return ReadConfigFile(filePath);
         }
 
         /// <summary>
@@ -53,8 +54,8 @@ namespace fanuc
 
             try
             {
-                // Organize the settings in json format 
-                var configs = new Dictionary<string, string>
+                // Structure the string into json format
+                var data = new Dictionary<string, string>
                 {
                     { TypeKey, TypeValue },
                     { ModelKey, ModelValue },
@@ -62,25 +63,23 @@ namespace fanuc
                     { OrgKey, string.Empty },
                 };
 
-                // Write the formed json file to the defined path
+                // Write the json file to the given path
                 var options = new JsonSerializerOptions { WriteIndented = true };
-                File.WriteAllText(filePath, JsonSerializer.Serialize(configs, options));
+                File.WriteAllText(filePath, JsonSerializer.Serialize(data, options));
             }
-            catch (Exception ex)
+            catch (Exception e)
             {
-                Console.WriteLine("Something went wrong: " + ex.Message);
+                Console.WriteLine("Something went wrong: " + e.Message);
             }
-            
-            return ReadConfigFile();
+
+            return ReadConfigFile(filePath);
         }
 
         /// <summary>
         /// Read the configuration file
         /// </summary>
-        internal static KernelSettings ReadConfigFile()
+        internal static KernelSettings ReadConfigFile(string filePath)
         {
-            string filePath = Path.Combine(Directory.GetCurrentDirectory(), ConfigFile);
-
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
                 .AddJsonFile(filePath, optional: true, reloadOnChange: true)
