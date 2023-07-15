@@ -1,23 +1,29 @@
-﻿using Microsoft.Extensions.Configuration;
-using System.Security.Cryptography;
-using System.Text.Json;
+﻿using System.Text.Json;
 
 namespace fanuc
 {
     internal class KernelSettings
     {
         private const string ConfigFile = "config.json";
+
         private const string TypeKey = "type";
-        private const string ModelKey = "model";
+        private const string ChatModelKey = "chatModel";
+        private const string TextModelKey = "textModel";
+        private const string EmbeddingModelKey = "embeddingModel";
+
+        private const string TypeValue = "OpenAI";
+        private const string ChatModelValue = "gpt-3.5-turbo";
+        private const string TextModelValue = "text-davinci-003";
+        private const string EmbeddingModelValue = "text-embedding-ada-002";
+
         private const string SecretKey = "apiKey";
         private const string OrgKey = "org";
-        private const string TypeValue = "OpenAI";
-        private const string ModelValue = "gpt-3.5-turbo";
 
         /// <summary>
         /// Load the kernel settings from config.json
         /// <summary>
-        internal static KernelSettings LoadConfigurations()
+        internal static (string type, string chat, string text, string embedding, string apiKey, string orgId)
+            LoadConfigurations()
         {
             string filePath = Path.Combine(Directory.GetCurrentDirectory(), ConfigFile);
 
@@ -27,10 +33,8 @@ namespace fanuc
                 Console.WriteLine($"Configuration file not found: {filePath}");
                 Console.WriteLine("A new configuration file will be created.");
                 CreateConfigFile(filePath);
+                return ReadConfigFile(filePath);
             }
-
-            // If exists, then read the file and load the config.json
-            Console.WriteLine("Configuration file is found for loading.");
 
             return ReadConfigFile(filePath);
         }
@@ -40,7 +44,7 @@ namespace fanuc
         /// API key will be asked and obtained from console input
         /// </summary>
         /// <param name="filePath"></param>
-        internal static KernelSettings CreateConfigFile(string filePath)
+        internal static void CreateConfigFile(string filePath)
         {
             Console.WriteLine("Creating the configuration file...");
 
@@ -58,7 +62,9 @@ namespace fanuc
                 var data = new Dictionary<string, string>
                 {
                     { TypeKey, TypeValue },
-                    { ModelKey, ModelValue },
+                    { ChatModelKey, ChatModelValue },
+                    { TextModelKey, TextModelValue },
+                    { EmbeddingModelKey, EmbeddingModelValue },
                     { SecretKey, key },
                     { OrgKey, string.Empty },
                 };
@@ -71,22 +77,36 @@ namespace fanuc
             {
                 Console.WriteLine("Something went wrong: " + e.Message);
             }
-
-            return ReadConfigFile(filePath);
         }
 
         /// <summary>
-        /// Read the configuration file
+        /// Read configuration in the config.json
         /// </summary>
-        internal static KernelSettings ReadConfigFile(string filePath)
+        /// <param name="filePath"></param>
+        /// <returns></returns>
+        internal static (string type, string chat, string text, string embedding, string apiKey, string orgId)
+            ReadConfigFile(string filePath)
         {
-            var configuration = new ConfigurationBuilder()
-                .SetBasePath(Directory.GetCurrentDirectory())
-                .AddJsonFile(filePath, optional: true, reloadOnChange: true)
-                .Build();
+            string apikey = "";
+            string orgId = "";
 
-            return configuration.Get<KernelSettings>()
-                ?? throw new InvalidOperationException($"Invalid semantic kernel settings.");
+            try
+            {
+                Console.WriteLine("Configuration file is found for loading.");
+
+                var config = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(filePath));
+                if (config != null)
+                {
+                    apikey = config[SecretKey];
+                    orgId = config[OrgKey];
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Something went wrong: " + ex.Message);
+            }
+
+            return (TypeValue, ChatModelValue, TextModelValue, EmbeddingModelValue, apikey, orgId);
         }
     }
 }

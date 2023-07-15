@@ -1,5 +1,6 @@
 ﻿using fanuc;
-using System.Reflection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace FanucRobotServer
 {
@@ -15,8 +16,13 @@ namespace FanucRobotServer
             //Console.ReadLine();
             //server.Stop();
 
-            var kernelSettings = KernelSettings.LoadConfigurations();
-            Console.WriteLine(kernelSettings.ToString());
+            // Load the kernel setting
+            (string type, string chat, string text, string embedding, string apiKey, string orgId) = KernelSettings.LoadConfigurations();
+            Console.WriteLine("Using service: " + type);
+            Console.WriteLine("Using chat model: " + chat);
+            Console.WriteLine("Using text model: " + text);
+            Console.WriteLine("Using embedding model: " + embedding);
+            Console.WriteLine("API Key: " + apiKey.Substring(0, 3) + "...");
         }
     }
 }
