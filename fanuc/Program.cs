@@ -19,11 +19,11 @@ namespace FanucRobotServer
 
             // Load the kernel setting
             (string type, string chat, string text, string embedding, string apiKey, string orgId) = KernelSettings.LoadConfigurations();
-            Console.WriteLine("Using service: " + type);
-            Console.WriteLine("Using chat model: " + chat);
-            Console.WriteLine("Using text model: " + text);
-            Console.WriteLine("Using embedding model: " + embedding);
-            Console.WriteLine("API Key: " + apiKey.Substring(0, 3) + "...");
+            //Console.WriteLine("using service: " + type);
+            Console.WriteLine("using chat model: " + chat);
+            //Console.WriteLine("using text model: " + text);
+            //Console.WriteLine("using embedding model: " + embedding);
+            //Console.WriteLine("api key: " + apiKey.Substring(0, 3) + "...");
 
             var builder = new KernelBuilder();
             builder.WithOpenAIChatCompletionService(modelId: chat, apiKey: apiKey);

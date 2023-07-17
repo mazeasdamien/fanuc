@@ -23,7 +23,7 @@ namespace fanuc.skills
         // Define font color for each role's text shown on the console 
         private readonly Dictionary<AuthorRole, ConsoleColor> _roleConsoleColor = new()
         {
-            {AuthorRole.System,    ConsoleColor.Blue },
+            {AuthorRole.System,    ConsoleColor.DarkCyan },
             {AuthorRole.User,      ConsoleColor.Yellow },
             {AuthorRole.Assistant, ConsoleColor.Green },
         };
@@ -71,6 +71,7 @@ namespace fanuc.skills
         public Task LogChatHistory()
         {
             Console.WriteLine();
+            Console.WriteLine("==========================================");
             Console.WriteLine("Chat history: ");
             Console.WriteLine();
 
